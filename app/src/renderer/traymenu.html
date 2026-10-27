@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+  <title>Next Notify</title>
+  <link rel="stylesheet" href="shared/fonts.css">
+  <link rel="stylesheet" href="dashboard.css">
+  <style>
+    /* Gölge payı, traymenu.ts PAD ile aynı. */
+    html, body { height: auto; background: transparent; overflow: hidden; }
+    body { padding: 14px; }
+    .menu { display: flex; flex-direction: column; padding: 6px; border: 1px solid var(--line); border-radius: 18px; background: var(--raise); box-shadow: var(--shadow), 0 2px 10px rgba(0, 0, 0, 0.2); outline: none; animation: rise 0.35s var(--ease); }
+    .menu-head { display: flex; align-items: center; gap: 11px; margin-bottom: 6px; padding: 12px 12px 14px; border-bottom: 1px solid var(--line); }
+    .menu-head img { width: 34px; height: 34px; }
+    .menu-head > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .wordmark { font: 700 18px/1 var(--font-display); letter-spacing: -0.03em; text-transform: lowercase; white-space: nowrap; }
+    .menu-status { display: flex; align-items: center; gap: 7px; }
+    .menu-status.paused .dot { background: var(--ink-mute); animation: none; }
+    .menu-status.error { color: var(--danger); }
+    .menu-status.error .dot { background: var(--danger); animation: none; }
+    .menu-sep { height: 1px; margin: 6px 6px; background: var(--line); }
+
+    .item { justify-content: flex-start; gap: 12px; width: 100%; height: 42px; padding: 0 10px; border: 0; border-radius: 12px; color: var(--ink); font: 500 13px/1 var(--font-body); letter-spacing: 0; text-transform: none; }
+    .item:hover:not(:disabled), .item:focus-visible { border: 0; background: rgba(var(--ink-rgb), 0.07); color: var(--ink); }
+    .item:focus-visible { outline: none; }
+    .item:active:not(:disabled) { transform: none; }
+    .item > span:nth-child(2) { flex: 1; text-align: left; }
+    .ico { display: grid; flex: none; place-items: center; width: 28px; height: 28px; border-radius: 9px; background: #0b58dc; color: #fff; }
+    .item.quit:hover .ico { background: var(--danger); }
+
+    .toggle { position: relative; flex: none; width: 34px; height: 20px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--field); transition: background-color 0.3s ease, border-color 0.3s ease; }
+    .toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--ink-soft); transition: transform 0.5s var(--ease), background-color 0.3s ease; }
+    .item[aria-checked="true"] .toggle { border-color: var(--accent); background: var(--accent); }
+    .item[aria-checked="true"] .toggle::after { background: var(--accent-ink); transform: translateX(14px); }
+  </style>
+</head>
+<body>
+  <div class="menu" id="menu" role="menu" tabindex="-1">
+    <header class="menu-head">
+      <img src="../../assets/brand/next-notify.svg" alt="">
+      <div>
+        <span class="wordmark">next notify</span>
+        <span class="label menu-status" id="status"><i class="dot"></i><span></span></span>
+      </div>
+    </header>
+    <button class="item" role="menuitem" data-action="open"><span class="ico" data-icon="settings"></span><span data-i18n="tray.open"></span></button>
+    <button class="item" role="menuitem" data-action="test"><span class="ico" data-icon="test"></span><span data-i18n="tray.test"></span></button>
+    <button class="item" role="menuitemcheckbox" data-action="toggle" id="toggle"><span class="ico" data-icon="pause"></span><span data-i18n="tray.notifications"></span><i class="toggle"></i></button>
+    <div class="menu-sep"></div>
+    <button class="item quit" role="menuitem" data-action="quit"><span class="ico" data-icon="quit"></span><span data-i18n="tray.quit"></span></button>
+  </div>
+  <script type="module" src="traymenu.js"></script>
+</body>
+</html>

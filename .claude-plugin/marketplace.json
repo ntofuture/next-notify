@@ -1,0 +1,14 @@
+{
+  "name": "next-notify",
+  "description": "Next Notify: desktop notifications for Claude Code",
+  "owner": {
+    "name": "Next to Future"
+  },
+  "plugins": [
+    {
+      "name": "next-notify",
+      "source": "./plugin",
+      "description": "Connects Claude Code to the Next Notify desktop app (Windows, macOS, Linux)"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "description": "Sends Stop and Notification events to the Next Notify app on 127.0.0.1:47821",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "http", "url": "http://127.0.0.1:47821/hook", "timeout": 5 }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt|idle_prompt|elicitation_dialog|agent_needs_input",
+        "hooks": [
+          { "type": "http", "url": "http://127.0.0.1:47821/hook", "timeout": 5 }
+        ]
+      }
+    ]
+  }
+}

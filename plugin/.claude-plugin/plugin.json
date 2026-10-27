@@ -1,0 +1,12 @@
+{
+  "name": "next-notify",
+  "version": "2.0.0",
+  "description": "Shows a desktop notification when Claude finishes, asks for permission or waits for input. Requires the Next Notify app.",
+  "author": {
+    "name": "Next to Future"
+  },
+  "homepage": "https://github.com/ntofuture/next-notify",
+  "repository": "https://github.com/ntofuture/next-notify",
+  "license": "MIT",
+  "keywords": ["notification", "desktop", "hooks", "windows", "macos", "linux"]
+}

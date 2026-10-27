@@ -1,0 +1,108 @@
+{
+  "name": "next-notify",
+  "productName": "Next Notify",
+  "version": "1.0.0",
+  "description": "Desktop notifications for Claude Code, Codex, Cursor, Gemini CLI and OpenCode",
+  "author": "Next to Future",
+  "license": "MIT",
+  "homepage": "https://github.com/ntofuture/next-notify",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ntofuture/next-notify.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ntofuture/next-notify/issues"
+  },
+  "private": true,
+  "type": "module",
+  "main": "out/src/main/main.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && electron .",
+    "icons": "tsc && electron out/scripts/make-icons.js",
+    "installer": "tsc && node out/scripts/make-installer.js",
+    "dist": "npm run installer && electron-builder --publish never",
+    "release": "npm run installer && electron-builder --publish always"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "electron": "45.0.0",
+    "electron-builder": "26.15.3",
+    "typescript": "7.0.2"
+  },
+  "build": {
+    "appId": "com.nexttofuture.nextnotify",
+    "productName": "Next Notify",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "out/src/**",
+      "src/**/*.html",
+      "src/**/*.css",
+      "assets/**",
+      "package.json"
+    ],
+    "protocols": [
+      {
+        "name": "Next Notify",
+        "schemes": [
+          "nextnotify"
+        ]
+      }
+    ],
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://storage.nextofuture.com/applications/next-notify"
+      },
+      {
+        "provider": "github",
+        "owner": "ntofuture",
+        "repo": "next-notify",
+        "releaseType": "draft"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "artifactName": "Next-Notify-Setup-${version}.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icon.png",
+      "artifactName": "Next-Notify-${version}-mac.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Development",
+      "maintainer": "Next to Future",
+      "icon": "build/icon.png",
+      "artifactName": "Next-Notify-${version}-${arch}.${ext}"
+    }
+  },
+  "dependencies": {
+    "electron-updater": "6.8.10"
+  }
+}

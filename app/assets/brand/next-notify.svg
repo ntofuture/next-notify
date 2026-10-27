@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="8 15 428 428" role="img" aria-label="Next Notify">
+<defs>
+  <linearGradient id="tile" x1="0.05" x2="0.92" y1="0.06" y2="0.94" objectBoundingBox="true">
+    <stop offset="0" stop-color="#188FFF"/><stop offset="0.24" stop-color="#0068E8"/><stop offset="0.56" stop-color="#072E8D"/><stop offset="0.82" stop-color="#063AA5"/><stop offset="1" stop-color="#075FCF"/>
+  </linearGradient>
+  <radialGradient id="tileGlow" cx="0.08" cy="0.04" r="0.98"><stop stop-color="#219DFF" stop-opacity="0.70"/><stop offset="0.5" stop-color="#0079F4" stop-opacity="0.10"/><stop offset="1" stop-color="#003596" stop-opacity="0"/></radialGradient>
+  <radialGradient id="tileGlowBottom" cx="0.9" cy="0.98" r="0.55"><stop stop-color="#007CFC" stop-opacity="0.48"/><stop offset="1" stop-color="#0052D4" stop-opacity="0"/></radialGradient>
+  <clipPath id="tileClip"><rect x="8" y="15" width="428" height="428" rx="110"/></clipPath>
+
+  <linearGradient id="cloud" x1="0.12" y1="0.08" x2="0.89" y2="0.93"><stop stop-color="#9EECFF"/><stop offset="0.34" stop-color="#5CB3FF"/><stop offset="0.74" stop-color="#297FFA"/><stop offset="1" stop-color="#0065DF"/></linearGradient>
+  <linearGradient id="cloudLower" x1="0.12" y1="0.25" x2="0.94" y2="0.85"><stop stop-color="#6ABFFC" stop-opacity=".8"/><stop offset="1" stop-color="#0072EC" stop-opacity=".25"/></linearGradient>
+  <linearGradient id="bell" x1="0.13" y1="0.12" x2="0.86" y2="0.95"><stop stop-color="#FFFFFF"/><stop offset="0.48" stop-color="#FFFFFF"/><stop offset="0.82" stop-color="#F3F5FF"/><stop offset="1" stop-color="#E9EEFF"/></linearGradient>
+  <linearGradient id="clapper" x1="0.4" y1="0" x2="0.55" y2="1"><stop stop-color="#FCFEFF"/><stop offset="1" stop-color="#E2EAFF"/></linearGradient>
+  <linearGradient id="red" x1="0.07" y1="0.07" x2="0.97" y2="0.95"><stop stop-color="#FF8291"/><stop offset="0.55" stop-color="#FF4D74"/><stop offset="1" stop-color="#FF3D77"/></linearGradient>
+</defs>
+<g clip-path="url(#tileClip)"><rect x="8" y="15" width="428" height="428" fill="url(#tile)"/><rect x="8" y="15" width="428" height="428" fill="url(#tileGlow)"/><rect x="8" y="15" width="428" height="428" fill="url(#tileGlowBottom)"/></g>
+
+  <path fill="url(#cloud)" d="M145 190 C145 133 187 90 245 90 C300 90 338 122 342 168 C404 167 438 207 438 257 C438 308 400 350 347 351 H323 V306 H344 C372 306 388 287 388 264 C388 237 370 216 345 216 C319 215 297 203 294 181 C290 157 271 141 244 141 C216 141 196 162 196 190 V195 C194 222 174 241 146 242 C125 242 108 262 108 284 C108 308 127 328 151 328 H195 V378 H152 C97 378 58 340 58 284 C58 233 95 192 145 190 Z"/>
+  <path fill="url(#cloudLower)" d="M145 190 C120 190 97 204 81 223 C108 215 123 220 145 242 C170 244 191 223 196 194 V190 C196 163 215 140 244 141 C271 141 290 157 294 181 C296 197 313 213 342 216 V168 C338 122 300 90 245 90 C187 90 145 133 145 190 Z" opacity=".36"/>
+  <path fill="url(#clapper)" d="M260 358 H311 V371 C311 387 301 398 285 398 C270 398 260 386 260 371 Z"/>
+  <path fill="url(#bell)" d="M284 234 C316 234 339 258 341 286 L342 314 C342 330 347 340 355 348 C364 359 360 365 347 365 H222 C208 365 205 357 214 348 C228 336 232 325 232 306 V286 C232 258 252 234 284 234 Z"/>
+  <circle cx="338" cy="255" r="25.5" fill="url(#red)"/>
+
+</svg>

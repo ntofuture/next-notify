@@ -1,0 +1,10 @@
+node_modules/
+app/dist/
+app/out/
+app/build/setup/art/
+installer/*
+!installer/build.bat
+!installer/build.sh
+*.log
+.DS_Store
+Thumbs.db
