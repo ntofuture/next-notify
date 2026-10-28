@@ -9,3 +9,4 @@ publish/
 Thumbs.db
 private_keys/
 upload.bat
+upload.sh

@@ -22,16 +22,26 @@ MODE="${2:-}"
 if [ -z "$MODE" ]; then
   echo '1. Build: app folder to try locally (publish/)'
   echo '2. Installer: installer and update files for the server (installer/)'
+  echo '3. Upload: send installer/ to the server (upload.sh)'
   while [ -z "$MODE" ]; do
-    read -r -p 'Choose 1 or 2: ' answer
+    read -r -p 'Choose 1, 2 or 3: ' answer
     case "$answer" in
       1) MODE=build ;;
       2) MODE=installer ;;
+      3) MODE=upload ;;
     esac
   done
-elif [ "$MODE" != build ] && [ "$MODE" != installer ]; then
-  echo "Not a mode: $MODE (use build or installer)" >&2
+elif [ "$MODE" != build ] && [ "$MODE" != installer ] && [ "$MODE" != upload ]; then
+  echo "Not a mode: $MODE (use build, installer or upload)" >&2
   exit 1
+fi
+
+if [ "$MODE" = upload ]; then
+  if [ ! -f "$ROOT/upload.sh" ]; then
+    echo "upload.sh not found in $ROOT" >&2
+    exit 1
+  fi
+  exec bash "$ROOT/upload.sh"
 fi
 if [ "$MODE" = build ]; then OUT="$ROOT/publish"; else OUT="$ROOT/installer"; fi
 
