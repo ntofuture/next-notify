@@ -173,7 +173,7 @@ function agentSetup(id: Agent) {
   const home = (...parts: string[]) => (win ? `%USERPROFILE%\\${parts.join('\\')}` : `~/${parts.join('/')}`)
   const json = (value: unknown) => JSON.stringify(value, null, 2)
   const command = (a: Agent) => [{ hooks: [{ type: 'command', command: curl(a) }] }]
-  if (id === 'claude') return { commands: [`/plugin marketplace add ${S.repo}`, '/plugin install next-notify@next-notify'] }
+  if (id === 'claude') return { commands: [`/plugin marketplace add ${S.repo}`, '/plugin install next-notify@next-notify'], extension: S.repo }
   if (id === 'codex') return { file: home('.codex', 'hooks.json'), code: json({ hooks: { Stop: command(id), PermissionRequest: command(id) } }) }
   if (id === 'cursor') return { file: home('.cursor', 'hooks.json'), code: json({ version: 1, hooks: { stop: [{ command: curl(id) }] } }) }
   if (id === 'gemini') return { file: home('.gemini', 'settings.json'), code: json({ hooks: { AfterAgent: command(id), Notification: command(id) } }) }
@@ -206,6 +206,7 @@ function renderAgent() {
   $('#agentSetup').innerHTML =
     `<small>${esc(t(`agent.${agent}.hint`))}</small>` +
     (setup.commands?.map((c) => `<div class="cmd"><code>${esc(c)}</code>${copy}</div>`).join('') ?? '') +
+    (setup.extension ? `<small>${esc(t('agent.claude.extension'))}</small><div class="cmd"><code>${esc(setup.extension)}</code>${copy}</div>` : '') +
     (setup.file ? `<code class="path">${esc(setup.file)}</code><div class="cmd block"><pre>${esc(setup.code)}</pre>${copy}</div>` : '')
 }
 

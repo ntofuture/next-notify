@@ -26,13 +26,22 @@ $nodeDir = Join-Path $env:NVM_HOME 'v24.14.0'
 if (-not (Test-Path (Join-Path $nodeDir 'node.exe'))) { throw "Node.js 24.14.0 not found in ${nodeDir}. Install it with: nvm install 24.14.0" }
 $env:Path = "$nodeDir;$env:Path"
 
-$modes = @{ '1' = 'build'; '2' = 'installer' }
+$modes = @{ '1' = 'build'; '2' = 'installer'; '3' = 'upload' }
 if (-not $Mode) {
     Write-Host '1. Build: app folder to try locally (publish\)'
     Write-Host '2. Installer: installer and update files for the server (installer\)'
-    while (-not $Mode) { $Mode = $modes[(Read-Host 'Choose 1 or 2').Trim()] }
+    Write-Host '3. Upload: send installer\ to the server (upload.bat)'
+    while (-not $Mode) { $Mode = $modes[(Read-Host 'Choose 1, 2 or 3').Trim()] }
 }
-elseif ($Mode -notin $modes.Values) { throw "Not a mode: $Mode (use build or installer)" }
+elseif ($Mode -notin $modes.Values) { throw "Not a mode: $Mode (use build, installer or upload)" }
+
+if ($Mode -eq 'upload') {
+    $upload = Join-Path $root 'upload.bat'
+    if (-not (Test-Path $upload)) { throw "upload.bat not found in $root" }
+    & $upload
+    if ($LASTEXITCODE -ne 0) { throw 'upload.bat failed' }
+    return
+}
 $out = Join-Path $root $(if ($Mode -eq 'build') { 'publish' } else { 'installer' })
 
 $current = (Get-Content (Join-Path $app 'package.json') -Raw | ConvertFrom-Json).version
@@ -96,7 +105,7 @@ if ($Mode -eq 'build') {
     return
 }
 
-$files = Get-ChildItem $dist -File | Where-Object { $_.Name -like "Next-Notify-*$Version*" -or $_.Name -like 'latest*.yml' }
+$files = Get-ChildItem $dist -File | Where-Object { $_.Name -like "Next-Notify-*$Version*" -or $_.Name -like 'NextNotify-Setup.*' -or $_.Name -like 'latest*.yml' }
 if (-not $files) { throw "No installer found in $dist" }
 $files | Copy-Item -Destination $out
 

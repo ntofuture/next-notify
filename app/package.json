@@ -72,7 +72,7 @@
       "oneClick": false,
       "uninstallDisplayName": "${productName}",
       "deleteAppDataOnUninstall": true,
-      "artifactName": "Next-Notify-Setup-${version}.${ext}"
+      "artifactName": "NextNotify-Setup.${ext}"
     },
     "mac": {
       "target": [
@@ -91,7 +91,7 @@
       ],
       "category": "public.app-category.developer-tools",
       "icon": "build/icon.png",
-      "artifactName": "Next-Notify-${version}-mac.${ext}"
+      "artifactName": "NextNotify-Setup.${ext}"
     },
     "linux": {
       "target": [

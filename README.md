@@ -24,8 +24,8 @@ Design and settings are shared by every agent, so all of them look and sound the
 
 | Platform | File |
 |---|---|
-| Windows | `Next-Notify-Setup-x.y.z.exe` |
-| macOS (Intel and Apple silicon) | `Next-Notify-x.y.z-mac.dmg` |
+| Windows | `NextNotify-Setup.exe` |
+| macOS (Intel and Apple silicon) | `NextNotify-Setup.dmg` |
 | Linux | `Next-Notify-x.y.z-x86_64.AppImage` or `.deb` |
 
 The app runs in the tray / menu bar and starts at login by default. It checks for a new version every time it starts, downloads it in the background and installs it silently once the settings window is closed.
@@ -49,6 +49,12 @@ Run these in Claude Code:
 /plugin marketplace add ntofuture/next-notify
 /plugin install next-notify@next-notify
 ```
+
+If you only use the VS Code extension and the Claude Code CLI isn't installed, these commands may not work fully. Instead:
+
+1. Type `/plugins` in the prompt box to open **Manage plugins**.
+2. Add `ntofuture/next-notify` in the **Marketplaces** tab on the right.
+3. Switch to the **Plugins** tab on the left, search for `next-notify`, install it and make sure it's turned on.
 
 Then start a new Claude session. To check, run `/next-notify:test`.
 </details>

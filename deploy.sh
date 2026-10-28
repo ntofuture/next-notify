@@ -109,7 +109,7 @@ if [ "$MODE" = build ]; then
   exit 0
 fi
 
-files=("$DIST"/Next-Notify-*"$VERSION"* "$DIST"/latest*.yml)
+files=("$DIST"/Next-Notify-*"$VERSION"* "$DIST"/NextNotify-Setup.* "$DIST"/latest*.yml)
 if [ ${#files[@]} -eq 0 ]; then
   echo "No installer found in $DIST" >&2
   exit 1

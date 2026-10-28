@@ -24,8 +24,8 @@ Tasarım ve ayarlar tüm ajanlar için ortaktır; hepsi aynı görünür ve ayn�
 
 | Platform | Dosya |
 |---|---|
-| Windows | `Next-Notify-Setup-x.y.z.exe` |
-| macOS (Intel ve Apple silicon) | `Next-Notify-x.y.z-mac.dmg` |
+| Windows | `NextNotify-Setup.exe` |
+| macOS (Intel ve Apple silicon) | `NextNotify-Setup.dmg` |
 | Linux | `Next-Notify-x.y.z-x86_64.AppImage` ya da `.deb` |
 
 Uygulama sistem tepsisinde / menü çubuğunda çalışır ve varsayılan olarak oturum açılınca başlar. Her açılışta yeni sürüm olup olmadığına bakar, varsa arka planda indirir ve ayar penceresi kapalıyken sessizce kurar.
@@ -49,6 +49,12 @@ Claude Code'da çalıştırın:
 /plugin marketplace add ntofuture/next-notify
 /plugin install next-notify@next-notify
 ```
+
+Claude Code CLI kurulu değilse ve yalnızca VS Code eklentisini kullanıyorsanız bu komutlar tam çalışmayabilir. Bunun yerine:
+
+1. Sohbet kutusuna `/plugins` yazıp **Manage plugins**'i açın.
+2. Sağdaki **Marketplaces** sekmesinde `ntofuture/next-notify` adresini ekleyin.
+3. Soldaki **Plugins** sekmesine geçin, `next-notify`'ı aratın, kurun ve açık olduğundan emin olun.
 
 Ardından yeni bir Claude oturumu başlatın. Kontrol etmek için `/next-notify:test` komutunu çalıştırın.
 </details>
