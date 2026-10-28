@@ -35,6 +35,18 @@ elif [ "$MODE" != build ] && [ "$MODE" != installer ]; then
 fi
 if [ "$MODE" = build ]; then OUT="$ROOT/publish"; else OUT="$ROOT/installer"; fi
 
+if [ "$MODE" = installer ] && [ "$(uname)" = Darwin ]; then
+  keys=("$ROOT"/private_keys/AuthKey_*.p8)
+  if [ ! -f "${keys[0]}" ] || [ ! -s "$ROOT/private_keys/issuer" ]; then
+    echo "Signing needs private_keys/AuthKey_<key id>.p8 and private_keys/issuer in $ROOT" >&2
+    exit 1
+  fi
+  export APPLE_API_KEY="${keys[0]}"
+  APPLE_API_KEY_ID="${APPLE_API_KEY##*/AuthKey_}"
+  export APPLE_API_KEY_ID="${APPLE_API_KEY_ID%.p8}"
+  export APPLE_API_ISSUER="$(tr -d '[:space:]' < "$ROOT/private_keys/issuer")"
+fi
+
 cd "$APP"
 CURRENT="$(node -p "require('./package.json').version")"
 VERSION="${1:-}"
@@ -73,7 +85,7 @@ if [ "$MODE" = build ]; then
   npm run build
   CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --dir
 else
-  CSC_IDENTITY_AUTO_DISCOVERY=false npm run dist
+  npm run dist
 fi
 
 rm -rf "$OUT"
@@ -82,7 +94,7 @@ shopt -s nullglob
 
 if [ "$MODE" = build ]; then
   folders=()
-  for folder in "$DIST"/linux-unpacked "$DIST"/mac-universal; do
+  for folder in "$DIST"/linux-unpacked "$DIST"/mac "$DIST"/mac-arm64 "$DIST"/mac-universal; do
     if [ -d "$folder" ]; then folders+=("$folder"); fi
   done
   if [ ${#folders[@]} -eq 0 ]; then

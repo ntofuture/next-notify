@@ -7,3 +7,4 @@ publish/
 *.log
 .DS_Store
 Thumbs.db
+private_keys/
