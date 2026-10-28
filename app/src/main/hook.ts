@@ -48,7 +48,6 @@ export function plainText(text: string | undefined, max: number) {
   return t
 }
 
-// last_assistant_message yoksa transcript'ten okunur.
 function transcriptTail(file: string) {
   let fd: number | undefined
   try {

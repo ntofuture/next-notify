@@ -1,7 +1,7 @@
 import { BrowserWindow, screen, type WebContents } from 'electron'
 import type { TrayState } from '../types.js'
 
-const PAD = 14 // gölge payı, traymenu.html ile aynı
+const PAD = 14
 const WIDTH = 252 + PAD * 2
 
 let win: BrowserWindow | undefined
@@ -11,7 +11,6 @@ const alive = () => !!win && !win.isDestroyed()
 export const isTrayMenu = (sender: WebContents) => alive() && win!.webContents === sender
 
 export function showTrayMenu({ url, preload, icon, data }: { url: string; preload: string; icon: string; data: TrayState }) {
-  // Odak kaybı tıklamadan hemen önce gelir.
   if (data.place && Date.now() - hiddenAt < 300) return
   if (!data.place && !(alive() && win!.isVisible())) return
   if (!alive()) create(url, preload, icon)

@@ -15,7 +15,6 @@ import { translator } from '../renderer/shared/i18n.js'
 
 export const PORT = 47821
 const REPO = 'ntofuture/next-notify'
-// Derlenmiş dosya out/src/main altındadır.
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url))
 const PRELOAD = path.join(ROOT, 'out', 'src', 'preload.cjs')
 const ICON = path.join(ROOT, 'assets', 'icon.png')
@@ -38,8 +37,6 @@ const events: LogEntry[] = []
 const lang = () => (cfg.language === 'auto' ? (app.getLocale().toLowerCase().startsWith('tr') ? 'tr' : 'en') : cfg.language)
 const t = (key: string, vars?: Record<string, string | number>) => translator(lang())(key, vars)
 
-// ─── Dosyalar ───
-// .js istekleri derleme çıktısından (out) verilir.
 function serveFiles() {
   const allowed = [path.join(ROOT, 'src'), path.join(ROOT, 'out', 'src'), path.join(ROOT, 'assets')]
   protocol.handle('app', (request) => {
@@ -56,7 +53,6 @@ function serveFiles() {
   })
 }
 
-// ─── Bildirim ───
 function notify(hook: Hook, { test = false, config = cfg, origin = null }: { test?: boolean; config?: Config; origin?: Promise<Origin> | null } = {}) {
   if (!test) lastHook = Date.now()
   const agent = hook.agent ?? 'claude'
@@ -77,7 +73,6 @@ async function openOrigin(origin: Promise<Origin> | null, cwd: string) {
   focusOrigin(await origin, cwd)
 }
 
-// Yanıt, istemci süreci bulunana kadar bekler.
 function onHook(raw: Hook, port: number, agent: Agent) {
   const hook = normalize(agent, raw)
   if (!hook) return Promise.resolve(null)
@@ -124,7 +119,6 @@ function log(note: Pick<LogEntry, 'category' | 'agent' | 'project' | 'title'>, s
   dashboard?.webContents.send('events', { events, lastHook })
 }
 
-// ─── Ayarlar ───
 function applyConfig(next: Config, { push = false } = {}) {
   cfg = saveConfig(next)
   syncAutostart()
@@ -185,7 +179,6 @@ function systemSounds() {
   }
 }
 
-// ─── Pencereler ───
 function openDashboard() {
   if (dashboard) {
     if (dashboard.isMinimized()) dashboard.restore()
@@ -217,7 +210,6 @@ function openDashboard() {
   win.loadURL(page('dashboard'))
 }
 
-// Linux'ta tepsi tıklamaları güvenilir değil.
 const customTrayMenu = process.platform !== 'linux'
 
 function createTray() {
@@ -239,7 +231,6 @@ const menuIcon = (name: string) => nativeImage.createFromPath(path.join(ROOT, 'a
 
 function updateTrayMenu() {
   if (customTrayMenu) return openTrayMenu(false)
-  // Simgeli öğede Windows onay işareti göstermez.
   tray?.setContextMenu(
     Menu.buildFromTemplate([
       { label: 'Next Notify', enabled: false },
@@ -263,7 +254,6 @@ function handleUrl(url: string) {
   openDashboard()
 }
 
-// ─── Güncelleme ───
 const { autoUpdater } = updater
 const UPDATED = () => path.join(app.getPath('userData'), 'updated')
 let updateReady = false
@@ -282,7 +272,6 @@ function installUpdate() {
   autoUpdater.quitAndInstall(true, true)
 }
 
-// ─── Panel ile iletişim ───
 ipcMain.handle(
   'state',
   (): State => ({
@@ -327,11 +316,9 @@ ipcMain.on('popup:click', (e) => {
 })
 ipcMain.on('popup:close', (e) => entryFor(e.sender)?.win.close())
 
-// ─── Tepsi menüsü ───
 ipcMain.on('tray:size', (e, height: number) => isTrayMenu(e.sender) && placeTrayMenu(height))
 ipcMain.on('tray:action', (e, action: TrayAction) => {
   if (!isTrayMenu(e.sender)) return
-  // Bildirimleri açıp kapatmak menüyü kapatmaz.
   if (action === 'toggle') return applyConfig({ ...cfg, enabled: !cfg.enabled }, { push: true })
   hideTrayMenu()
   if (action === 'open') openDashboard()
@@ -339,7 +326,6 @@ ipcMain.on('tray:action', (e, action: TrayAction) => {
   else if (action === 'quit') app.quit()
 })
 
-// ─── Uygulama ───
 app.on('second-instance', (_e, argv) => {
   const url = argv.find((a) => a.startsWith('nextnotify://'))
   if (url) handleUrl(url)
@@ -350,7 +336,6 @@ app.on('open-url', (e, url) => {
   if (app.isReady() && cfg) handleUrl(url)
   else pendingUrl = url
 })
-// Pencereler kapansa da tepside çalışmaya devam eder.
 app.on('window-all-closed', () => {})
 app.on('activate', openDashboard)
 

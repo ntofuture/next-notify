@@ -56,7 +56,6 @@ while ($all.ContainsKey($id) -and $n -lt 16) { $p = $all[$id]; "$id|$($p.Executa
   return chain
 }
 
-// VS Code çatalları adres şemasını product.json'da taşır.
 const protocols = new Map<string, string | null>()
 function editorProtocol(exe: string) {
   if (!exe) return null
@@ -64,7 +63,6 @@ function editorProtocol(exe: string) {
   const dir = path.dirname(exe)
   const candidates = [path.join(dir, 'resources', 'app'), path.join(dir, '..', 'Resources', 'app')]
   try {
-    // Yeni VS Code kurulumları sürüm klasöründedir.
     for (const d of fs.readdirSync(dir, { withFileTypes: true })) if (d.isDirectory()) candidates.push(path.join(dir, d.name, 'resources', 'app'))
   } catch {}
   let protocol: string | null = null
@@ -135,7 +133,6 @@ export async function focusOrigin(origin: Origin, cwd: string) {
     return shell.openExternal(encodeURI(`${origin.protocol}://file${target}`)).catch(() => {})
   }
   if ('app' in origin) return run('open', ['-a', origin.app])
-  // Alt basışı Windows'un öne getirme kilidini açar.
   return ps(`${USER32}
 $h = [IntPtr]${origin.win}
 ${FOCUS}`)

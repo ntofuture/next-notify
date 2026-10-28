@@ -2,7 +2,7 @@ import { BrowserWindow, screen, type Display, type WebContents } from 'electron'
 import type { Config, Note } from '../types.js'
 import type { Origin } from './origin.js'
 
-const PAD = 28 // kart gölgesi için pencere kenarındaki boşluk
+const PAD = 28
 const MARGIN = 16
 const GAP = 10
 const MAX = 5

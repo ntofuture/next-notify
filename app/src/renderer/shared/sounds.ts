@@ -1,4 +1,3 @@
-// [frekans (Hz), başlangıç (sn), süre (sn), dalga]
 type Note = [number, number, number, OscillatorType?]
 
 const PRESETS: Record<string, Note[] | 'pop'> = {
@@ -54,7 +53,6 @@ function synth(name: string, volume: number) {
   }
   for (const [freq, at, dur, type] of notes) {
     tone(c, out, freq, now + at, dur, type)
-    // Hafif bir üst ton sesi zil gibi yapar.
     if (!type) tone(c, out, freq * 2, now + at, dur * 0.6, 'sine')
   }
 }

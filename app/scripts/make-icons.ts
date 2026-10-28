@@ -1,17 +1,14 @@
-// npm run icons: simgeleri SVG'den PNG'ye çizer.
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { app, BrowserWindow } from 'electron'
 import { MENU_ICONS } from '../src/renderer/shared/look.js'
 
-// Derlenmiş betik out/scripts altındadır.
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const logo = fs.readFileSync(path.join(ROOT, 'assets/brand/next-notify.svg'), 'utf8')
 
 const appIcon = logo.replace(/^<\?xml[^>]*>\s*/, '').replace(/<svg[^>]*>/, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="8 15 428 428">')
 
-// macOS menü çubuğu: logonun siyah silueti; çan ve nokta buluttan ince bir boşlukla ayrılır.
 const [cloud, , clapper, bell] = [...logo.matchAll(/<path[^>]* d="([^"]+)"/g)].map((m) => m[1])
 const dot = 'cx="338" cy="255"'
 const template = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="53 49 390 390">
@@ -22,7 +19,6 @@ const template = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="53 49 390 390
   <circle ${dot} r="28"/>
 </svg>`
 
-// Linux sistem menüsü simgeleri.
 const menuIcon = (body: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="2 2.5 20 20" fill="none" stroke="#0B58DC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`
 
@@ -41,7 +37,6 @@ app.on('window-all-closed', () => {})
 app.whenReady().then(async () => {
   fs.mkdirSync(path.join(ROOT, 'assets/menu'), { recursive: true })
   for (const [file, size, svg] of targets) {
-    // Pencere küçük boyutlarda sistemce büyütülür; bu yüzden geniş çizilip tam size × size alan yakalanır.
     const side = Math.max(size, 128)
     const win = new BrowserWindow({ show: false, width: side, height: side, frame: false, transparent: true, useContentSize: true, webPreferences: { offscreen: true } })
     const html = `<html><body style="margin:0;background:transparent;overflow:hidden">${svg.replace('<svg ', `<svg style="display:block" width="${size}" height="${size}" `)}</body></html>`

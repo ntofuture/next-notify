@@ -60,6 +60,14 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+## 5. No Comments
+
+**The project has no comments. Keep it that way.**
+
+- Don't write comments in any file: `//`, `/* */`, `<!-- -->`, `#`, `;`.
+- Applies to new code and to edits of existing code.
+- Exceptions are lines the file needs to run: shebangs (`#!/usr/bin/env bash`) and the `<# : build.bat … #>` header in `build.bat`.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

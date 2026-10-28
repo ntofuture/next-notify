@@ -45,7 +45,6 @@ export function createCard(note: CardNote, popup: PopupConfig) {
     <button class="nn-close" type="button" aria-label="Close">${CLOSE}</button>
     <div class="nn-progress"><i></i></div>`
   const $ = (s: string) => card.querySelector<HTMLElement>(s)!
-  // Türkçe büyük harf kuralı (i → İ) uygulanmasın.
   $('.nn-meta').lang = 'en'
   $('.nn-meta b').textContent = note.project
   $('.nn-meta span').textContent = ` · ${note.time}`
@@ -56,7 +55,6 @@ export function createCard(note: CardNote, popup: PopupConfig) {
   $('.nn-stripe').hidden = !popup.accentStripe
   $('.nn-body').hidden = !note.body
   $('.nn-progress').hidden = !timed
-  // Gizli süre çubuğu yine sayaç olarak çalışır.
   $('.nn-progress').classList.toggle('invisible', !popup.showProgress)
 
   shell.append(card)

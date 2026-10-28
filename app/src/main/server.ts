@@ -8,7 +8,6 @@ type Handlers = {
   version: string
 }
 
-// Tarayıcıdan gelen istekler reddedilir.
 export function startServer(port: number, handlers: Handlers) {
   const status: ServerStatus = { listening: false, error: null }
 

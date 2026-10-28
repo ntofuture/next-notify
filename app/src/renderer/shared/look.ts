@@ -41,7 +41,6 @@ export const FONTS: Record<string, string> = {
 
 export const ACCENTS = ['#3BC7F5', '#0B58DC', '#FF3D77', '#FFB547', '#2EC88C', '#A17DE4', '#F2F5FB', '#E5A067']
 
-// Vurgu zemininde okunur ikon rengi.
 export function inkOn(hex: string) {
   const n = parseInt(hex.slice(1, 7), 16)
   const [r, g, b] = [n >> 16, (n >> 8) & 255, n & 255].map((c) => {

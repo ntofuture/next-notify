@@ -40,7 +40,6 @@ function put(path: string, value: unknown) {
   const last = keys.pop()!
   keys.reduce((o, k) => o[k] as Bag, cfg as unknown as Bag)[last] = value
 }
-// data-path tam yoldur; data-ev seçili olayın alanıdır.
 const pathOf = (el: HTMLElement) => el.dataset.path ?? `events.${category}.${el.dataset.ev}`
 
 let saveTimer: ReturnType<typeof setTimeout> | undefined
