@@ -1,0 +1,6 @@
+!macroundef MUI_UNPAGE_INSTFILES
+!macro MUI_UNPAGE_INSTFILES
+  !define MUI_PAGE_CUSTOMFUNCTION_SHOW un.nnUnShow
+  !insertmacro MUI_UNPAGE_INIT
+  !insertmacro MUI_PAGEDECLARATION_INSTFILES
+!macroend

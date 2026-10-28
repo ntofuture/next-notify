@@ -36,6 +36,10 @@ const TEXT = {
     done: 'Next Notify kuruldu. Başlat menüsünden açabilirsiniz; yeni sürümler otomatik olarak kurulur.',
     finish: 'Bitir',
     rights: '© 2026 Next to Future. Tüm hakları saklıdır.',
+    uninstall: 'Kaldır',
+    removeNote: 'Next Notify ve tüm ayarları bu bilgisayardan kaldırılacak.',
+    removing: 'Dosyalar siliniyor…',
+    removed: 'Next Notify ve ayarları bu bilgisayardan kaldırıldı.',
   },
   en: {
     version: `Version ${VERSION}`,
@@ -50,23 +54,26 @@ const TEXT = {
     done: 'Next Notify is installed. Open it from the Start menu; new versions install automatically.',
     finish: 'Finish',
     rights: '© 2026 Next to Future. All rights reserved.',
+    uninstall: 'Uninstall',
+    removeNote: 'Next Notify and all of its settings will be removed from this computer.',
+    removing: 'Removing files…',
+    removed: 'Next Notify and its settings have been removed from this computer.',
   },
 }
 
 const font = (file: string) => `data:font/ttf;base64,${fs.readFileSync(path.join(SRC, 'fonts', file)).toString('base64')}`
 const ASSETS = {
-  fonts: { 'REM Light': font('REM-Light.ttf'), REM: font('REM-Bold.ttf'), 'Martian Mono': font('MartianMono-Regular.ttf') },
+  fonts: { 'REM Light': font('REM-Light.ttf'), 'Martian Mono': font('MartianMono-Regular.ttf') },
+  display: `data:font/woff2;base64,${fs.readFileSync(path.join(ROOT, 'assets', 'fonts', 'museomoderno-latin.woff2')).toString('base64')}`,
   logo: `data:image/png;base64,${fs.readFileSync(path.join(ROOT, 'build', 'icon.png')).toString('base64')}`,
-  brand: fs.readFileSync(path.join(SRC, 'nextofuture.svg'), 'utf8'),
 }
 
 const RENDER = String.raw`async ({ assets, theme: c, text, lang, scale, page, on }) => {
   for (const [family, src] of Object.entries(assets.fonts)) document.fonts.add(await new FontFace(family, 'url(' + src + ')').load())
+  document.fonts.add(await new FontFace('MuseoModerno', 'url(' + assets.display + ')', { weight: '100 900' }).load())
   const logo = new Image()
   logo.src = assets.logo
   await logo.decode()
-  const view = assets.brand.match(/viewBox="([^"]*)"/)[1].split(/[\s,]+/).map(Number)
-  const marks = [...assets.brand.matchAll(/\sd="([^"]*)"/g)].map((m) => new Path2D(m[1]))
 
   const s = scale / 100
   const px = (v) => Math.round(v * s)
@@ -149,10 +156,11 @@ const RENDER = String.raw`async ({ assets, theme: c, text, lang, scale, page, on
     g.fill()
   }
 
-  const installing = page === 'installing'
-  const finished = page === 'finish'
+  const un = page.startsWith('un')
+  const installing = page === 'installing' || page === 'uninstalling'
+  const finished = page === 'finish' || page === 'unfinish'
   const rows = [{ x: 22, y: 166, w: 516, h: 40 }, { x: 22, y: 210, w: 516, h: 40 }]
-  const primaryText = finished ? text.finish : text.install
+  const primaryText = finished ? text.finish : un ? text.uninstall : text.install
   const primaryW = Math.round(Math.max(120, measure(primaryText, BODY) + 44))
   const cancelW = Math.round(measure(text.cancel, BODY) + 40)
   const primary = { x: 528 - primaryW, y: 337, w: primaryW, h: 42 }
@@ -163,7 +171,9 @@ const RENDER = String.raw`async ({ assets, theme: c, text, lang, scale, page, on
   shadow(32, 32, 48, 48, 12, 10, c.shadow / 2)
   g.imageSmoothingQuality = 'high'
   g.drawImage(logo, 32, 32, 48, 48)
-  const wordmark = top('next notify', 'bold 27px REM', rgba(c.text), 96, 28)
+  g.letterSpacing = 27 * -0.03 + 'px'
+  const wordmark = top('next notify', '700 27px MuseoModerno', rgba(c.text), 96, 28)
+  g.letterSpacing = '0px'
   label(text.version, rgba(c.faint), 96, 28 + wordmark + 4)
   if (!installing && !finished) {
     g.font = '12.5px "Segoe Fluent Icons", "Segoe MDL2 Assets"'
@@ -177,8 +187,8 @@ const RENDER = String.raw`async ({ assets, theme: c, text, lang, scale, page, on
   label(text.folder, rgba(c.faint), 32, 108)
 
   const alpha = installing ? 110 : 255
-  if (finished) toggle(rows[0], text.launch, on[0], alpha)
-  else {
+  if (finished && !un) toggle(rows[0], text.launch, on[0], alpha)
+  else if (!un) {
     toggle(rows[0], text.autostart, on[0], alpha)
     toggle(rows[1], text.shortcut, on[1], alpha)
   }
@@ -187,7 +197,8 @@ const RENDER = String.raw`async ({ assets, theme: c, text, lang, scale, page, on
     fill(32, 268, 496, 5, 2.5, rgba(c.text, c.track))
     fill(32, 268, finished ? 496 : 5, 5, 2.5, rgba(c.accent))
   }
-  wrap(finished ? text.done : installing ? text.copying : text.note, SMALL, rgba(c.muted), 32, 283, 496, 38)
+  const note = finished ? (un ? text.removed : text.done) : installing ? (un ? text.removing : text.copying) : un ? text.removeNote : text.note
+  wrap(note, SMALL, rgba(c.muted), 32, 283, 496, 38)
 
   if (installing) {
     fill(primary.x, primary.y, primary.w, primary.h, 21, rgba(c.button))
@@ -206,20 +217,17 @@ const RENDER = String.raw`async ({ assets, theme: c, text, lang, scale, page, on
   g.fillStyle = rgba(c.stroke)
   g.fillRect(32, 405, 496, 1)
   const brandH = 13
-  const brandW = (brandH * view[2]) / view[3]
-  const brandX = 528 - brandW
   g.font = SMALL
   const rights = g.measureText(text.rights)
   g.fillStyle = rgba(c.faint)
   g.textBaseline = 'alphabetic'
   g.fillText(text.rights, 32 + 2.25, 427 + (brandH - (rights.fontBoundingBoxAscent + rights.fontBoundingBoxDescent)) / 2 + rights.fontBoundingBoxAscent)
-  g.save()
-  g.translate(brandX, 427)
-  g.scale(brandH / view[3], brandH / view[3])
-  g.translate(-view[0], -view[1])
+  g.font = '700 17px MuseoModerno'
+  g.letterSpacing = 17 * -0.03 + 'px'
+  const brand = g.measureText('next to future')
   g.fillStyle = rgba(c.brand)
-  for (const mark of marks) g.fill(mark)
-  g.restore()
+  g.fillText('next to future', 528 - brand.width, 427 + (brandH - (brand.fontBoundingBoxAscent + brand.fontBoundingBoxDescent)) / 2 + brand.fontBoundingBoxAscent)
+  g.letterSpacing = '0px'
 
   return { png: canvas.toDataURL('image/png'), primaryW, cancelW }
 }`
@@ -274,7 +282,7 @@ async function draw(BrowserWindow: typeof Electron.BrowserWindow, nativeImage: t
 
   fs.rmSync(OUT, { recursive: true, force: true })
   const sets: string[] = []
-  const widths: Record<string, { primary: number; cancel: number; finish: number }> = {}
+  const widths: Record<string, { primary: number; cancel: number; finish: number; uninstall: number }> = {}
   for (const [themeName, theme] of Object.entries(THEMES)) {
     for (const [lang, text] of Object.entries(TEXT)) {
       for (const scale of SCALES) {
@@ -296,13 +304,21 @@ async function draw(BrowserWindow: typeof Electron.BrowserWindow, nativeImage: t
         const installingOff = await shot('installing', [false, false])
         const finish = await shot('finish', [true])
         const finishOff = await shot('finish', [false])
+        const unwelcome = await shot('unwelcome', [])
+        const uninstalling = await shot('uninstalling', [])
+        const unfinish = await shot('unfinish', [])
         const { primaryW, cancelW } = welcome.result
         const primary = { x: 528 - primaryW, y: 337, w: primaryW, h: 42 }
         const done = { x: 528 - finish.result.primaryW, y: 337, w: finish.result.primaryW, h: 42 }
+        const uninstall = { x: 528 - unwelcome.result.primaryW, y: 337, w: unwelcome.result.primaryW, h: 42 }
 
         save('welcome', welcome.image)
         save('installing', installing.image)
         save('finish', finish.image)
+        save('unwelcome', unwelcome.image)
+        save('uninstalling', uninstalling.image)
+        save('unfinish', unfinish.image)
+        save('uninstall', crop(unwelcome.image, uninstall))
         rows.forEach((r, i) => {
           save(`row${i + 1}-on`, crop(welcome.image, r))
           save(`row${i + 1}-off`, crop(welcomeOff.image, r))
@@ -315,7 +331,7 @@ async function draw(BrowserWindow: typeof Electron.BrowserWindow, nativeImage: t
         save('cancel', crop(welcome.image, { x: primary.x - 12 - cancelW, y: 337, w: cancelW, h: 42 }))
         save('install', crop(welcome.image, primary))
         save('done', crop(finish.image, done))
-        widths[lang] = { primary: primaryW, cancel: cancelW, finish: finish.result.primaryW }
+        widths[lang] = { primary: primaryW, cancel: cancelW, finish: finish.result.primaryW, uninstall: unwelcome.result.primaryW }
         sets.push(set)
         console.log(set)
       }
@@ -335,6 +351,7 @@ async function draw(BrowserWindow: typeof Electron.BrowserWindow, nativeImage: t
       `!define NN_PRIMARY_W_${lang} ${widths[lang].primary}`,
       `!define NN_CANCEL_W_${lang} ${widths[lang].cancel}`,
       `!define NN_FINISH_W_${lang} ${widths[lang].finish}`,
+      `!define NN_UNINSTALL_W_${lang} ${widths[lang].uninstall}`,
     ]),
     '',
   ]

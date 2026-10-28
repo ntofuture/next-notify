@@ -36,6 +36,11 @@ export function categorize(hook: Hook): Category {
   return 'idle'
 }
 
+export function projectRoot(cwd: string) {
+  for (let dir = cwd; path.dirname(dir) !== dir; dir = path.dirname(dir)) if (fs.existsSync(path.join(dir, '.git'))) return dir
+  return cwd
+}
+
 export function plainText(text: string | undefined, max: number) {
   if (!text) return ''
   let t = String(text)
@@ -81,7 +86,7 @@ export function buildNote(hook: Hook, cfg: Config, t: Translate): Note {
   const ev = cfg.events[category]
   const cwd = String(hook.cwd ?? '')
   const agent = hook.agent ?? 'claude'
-  const project = cwd ? path.basename(cwd.replace(/[\\/]+$/, '')) : AGENTS[agent]
+  const project = cwd ? path.basename(projectRoot(cwd).replace(/[\\/]+$/, '')) : AGENTS[agent]
   const max = cfg.behavior.summaryLength
   const summary = category === 'stop' ? plainText(hook.last_assistant_message || (hook.transcript_path ? transcriptTail(hook.transcript_path) : ''), max) : ''
   const vars = {

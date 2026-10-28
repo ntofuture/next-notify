@@ -10,6 +10,9 @@ const api: NnApi = {
   clearEvents: () => ipcRenderer.invoke('clear-events'),
   onEvents: (cb) => ipcRenderer.on('events', (_e, data) => cb(data)),
   onConfig: (cb) => ipcRenderer.on('config', (_e, config) => cb(config)),
+  windowAction: (action) => ipcRenderer.send('window', action),
+  onMaximized: (cb) => ipcRenderer.on('window:maximized', (_e, maximized) => cb(maximized)),
+  onCorner: (cb) => ipcRenderer.on('window:corner', (_e, corner) => cb(corner)),
 
   onShow: (cb) => ipcRenderer.on('popup:show', (_e, data) => cb(data)),
   ready: (height) => ipcRenderer.send('popup:ready', height),

@@ -1,4 +1,4 @@
-import type { Agent, Category, Config, Lang, State, Theme } from '../types.js'
+import type { Agent, Category, Config, Lang, State, Theme, WindowAction } from '../types.js'
 import { createCard } from './shared/card.js'
 import { translator, type Translate } from './shared/i18n.js'
 import { ACCENTS, AGENTS, FONTS, ICONS, THEMES, iconSvg } from './shared/look.js'
@@ -163,6 +163,7 @@ function renderSetup() {
   $('#lastHook').textContent = S.lastHook ? clock(S.lastHook, true) : t('setup.noHook')
   $('#hookState').className = `state ${S.lastHook ? 'ok' : ''}`
   $('#version').textContent = `next notify v${S.version} · ${S.platform}`
+  $('#footVersion').textContent = t('footer.version', { version: S.version })
 }
 
 function agentSetup(id: Agent) {
@@ -375,6 +376,7 @@ function bind() {
     else if (!$('#setupSheet').hidden) showSetup(false)
   })
   $('#themeSwitch').addEventListener('click', switchTheme)
+  for (const b of $$('button[data-win]')) b.addEventListener('click', () => window.nn.windowAction(b.dataset.win as WindowAction))
   $('#btnReset').addEventListener('click', async () => {
     if (!confirm(t('reset.confirm'))) return
     const r = await window.nn.reset()
@@ -414,6 +416,7 @@ async function refresh() {
 async function init() {
   S = await window.nn.state()
   cfg = S.config
+  document.documentElement.dataset.platform = S.platform
   setTheme(cfg.theme)
   bind()
   applyLang(S.lang)
@@ -426,6 +429,11 @@ async function init() {
   window.nn.onConfig((next) => {
     cfg = next
     sync()
+  })
+  window.nn.onMaximized((maximized) => document.documentElement.toggleAttribute('data-maximized', maximized))
+  window.nn.onCorner((corner) => {
+    if (corner) document.documentElement.dataset.corner = corner
+    else delete document.documentElement.dataset.corner
   })
   setTimeout(refresh, 800)
 }

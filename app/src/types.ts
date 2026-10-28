@@ -82,6 +82,7 @@ export type State = {
 
 export type TrayState = { place: boolean; lang: Lang; theme: Theme; enabled: boolean; listening: boolean; port: number }
 export type TrayAction = 'open' | 'test' | 'toggle' | 'quit' | 'close'
+export type WindowAction = 'minimize' | 'maximize' | 'close'
 export type Sample = { project?: string; sample?: string }
 
 export type NnApi = {
@@ -93,6 +94,9 @@ export type NnApi = {
   clearEvents: () => Promise<void>
   onEvents: (cb: (data: { events: LogEntry[]; lastHook: number | null }) => void) => void
   onConfig: (cb: (config: Config) => void) => void
+  windowAction: (action: WindowAction) => void
+  onMaximized: (cb: (maximized: boolean) => void) => void
+  onCorner: (cb: (corner: string) => void) => void
 
   onShow: (cb: (data: { note: CardNote; popup: PopupConfig }) => void) => void
   ready: (height: number) => void

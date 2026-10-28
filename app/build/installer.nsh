@@ -26,6 +26,19 @@
       FileClose $0
     ${EndIf}
   ${EndIf}
+  Delete "$newStartMenuLink"
+  CreateShortCut "$newStartMenuLink" "$appExe" "" "$appExe" 0 "" "" "${APP_DESCRIPTION}"
+  ClearErrors
+  WinShell::SetLnkAUMI "$newStartMenuLink" "${APP_ID}"
+  System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, p 0, p 0)'
+  nsExec::Exec '"$SYSDIR\ie4uinit.exe" -show'
+!macroend
+
+!macro customUnInstall
+  SetAutoClose true
+  ${IfNot} ${isUpdated}
+    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${APP_ID}"
+  ${EndIf}
 !macroend
 
 !macro nnPx OUT VALUE
@@ -59,8 +72,21 @@
   SendMessage $R6 0x172 0 $R7
 !macroend
 
-!macro customWelcomePage
+!macro nnWidth OUT NAME
+  ${If} $nnLang == tr
+    StrCpy ${OUT} ${NN_${NAME}_W_tr}
+  ${Else}
+    StrCpy ${OUT} ${NN_${NAME}_W_en}
+  ${EndIf}
+!macroend
+
+!macro nnCommon
   !include "setup\art\art.nsh"
+  !ifdef BUILD_UNINSTALLER
+    !define NN_UN un.
+  !else
+    !define NN_UN ""
+  !endif
 
   Var nnReady
   Var nnSet
@@ -73,23 +99,17 @@
   Var nnW
   Var nnH
   Var nnDlg
-  Var nnAutostart
-  Var nnShortcut
-  Var nnLaunch
-  Var nnRow1
-  Var nnRow2
-  Var nnLaunchRow
 
-  Page custom nnWelcome
-
-  Function nnPrepare
+  Function ${NN_UN}nnPrepare
     ${If} $nnReady == 1
       Return
     ${EndIf}
     StrCpy $nnReady 1
-    StrCpy $nnAutostart 1
-    StrCpy $nnShortcut 0
-    StrCpy $nnLaunch 1
+    !ifndef BUILD_UNINSTALLER
+      StrCpy $nnAutostart 1
+      StrCpy $nnShortcut 0
+      StrCpy $nnLaunch 1
+    !endif
     InitPluginsDir
     CreateDirectory "$PLUGINSDIR\nn"
 
@@ -165,7 +185,7 @@
     System::Call 'user32::SetWindowRgn(p $HWNDPARENT, p r3, i 1)'
   FunctionEnd
 
-  Function nnChrome
+  Function ${NN_UN}nnChrome
     GetDlgItem $0 $HWNDPARENT 1018
     System::Call 'user32::SetWindowPos(p r0, p 0, i 0, i 0, i $nnW, i $nnH, i 0x14)'
     System::Call 'user32::GetWindow(p $HWNDPARENT, i 5)p.r0'
@@ -178,7 +198,7 @@
     ${Loop}
   FunctionEnd
 
-  Function nnPath
+  Function ${NN_UN}nnPath
     !insertmacro nnPx $1 34
     !insertmacro nnPx $2 128
     !insertmacro nnPx $3 494
@@ -188,94 +208,34 @@
     !insertmacro nnColors $0
   FunctionEnd
 
-  Function nnBackground
+  Function ${NN_UN}nnBackground
     Exch $0
     ${NSD_CreateBitmap} 0 0 1 1 ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\nn\$0" $2
+    ${NSD_OnClick} $1 ${NN_UN}nnDrag
     System::Call 'user32::SetWindowPos(p r1, p 1, i 0, i 0, i 0, i 0, i 0x13)'
     Pop $0
   FunctionEnd
 
-  Function nnButtons
-    ${If} $nnLang == tr
-      StrCpy $R0 ${NN_PRIMARY_W_tr}
-      StrCpy $R1 ${NN_CANCEL_W_tr}
-    ${Else}
-      StrCpy $R0 ${NN_PRIMARY_W_en}
-      StrCpy $R1 ${NN_CANCEL_W_en}
-    ${EndIf}
-    IntOp $R2 528 - $R0
-    IntOp $R3 $R2 - 12
-    IntOp $R3 $R3 - $R1
+  Function ${NN_UN}nnDrag
+    Pop $0
+    System::Call 'user32::ReleaseCapture()'
+    SendMessage $HWNDPARENT 0xA1 2 0
   FunctionEnd
 
-  Function nnOnOff
-    Exch $0
-    ${If} $0 == 1
-      StrCpy $0 on
-    ${Else}
-      StrCpy $0 off
-    ${EndIf}
-    Exch $0
-  FunctionEnd
-
-  Function nnWelcome
-    Call nnPrepare
-    Call nnChrome
-    nsDialogs::Create 1018
-    Pop $nnDlg
-    !insertmacro nnColors $nnDlg
-    Call nnPath
-    Call nnButtons
-
-    Push $nnAutostart
-    Call nnOnOff
-    Pop $0
-    !insertmacro nnClickable $nnRow1 22 166 "row1-$0.bmp" nnToggleAutostart
-    Push $nnShortcut
-    Call nnOnOff
-    Pop $0
-    !insertmacro nnClickable $nnRow2 22 210 "row2-$0.bmp" nnToggleShortcut
-    !insertmacro nnClickable $0 512 16 "close.bmp" nnCancel
-    !insertmacro nnClickable $0 $R3 337 "cancel.bmp" nnCancel
-    !insertmacro nnClickable $0 $R2 337 "install.bmp" nnInstall
-
-    Push welcome.bmp
-    Call nnBackground
-    nsDialogs::Show
-  FunctionEnd
-
-  Function nnToggleAutostart
-    Pop $0
-    IntOp $nnAutostart $nnAutostart ^ 1
-    Push $nnAutostart
-    Call nnOnOff
-    Pop $0
-    ${NSD_SetImage} $nnRow1 "$PLUGINSDIR\nn\row1-$0.bmp" $1
-  FunctionEnd
-
-  Function nnToggleShortcut
-    Pop $0
-    IntOp $nnShortcut $nnShortcut ^ 1
-    Push $nnShortcut
-    Call nnOnOff
-    Pop $0
-    ${NSD_SetImage} $nnRow2 "$PLUGINSDIR\nn\row2-$0.bmp" $1
-  FunctionEnd
-
-  Function nnCancel
+  Function ${NN_UN}nnCancel
     Pop $0
     SendMessage $HWNDPARENT ${WM_COMMAND} 2 0
   FunctionEnd
 
-  Function nnInstall
+  Function ${NN_UN}nnNext
     Pop $0
     SendMessage $HWNDPARENT ${WM_COMMAND} 1 0
   FunctionEnd
 
-  Function nnInstShow
-    Call nnChrome
+  Function ${NN_UN}nnProgress
+    Call ${NN_UN}nnChrome
     FindWindow $nnDlg "#32770" "" $HWNDPARENT
     !insertmacro nnColors $nnDlg
     System::Call 'user32::SetWindowPos(p $nnDlg, p 0, i 0, i 0, i $nnW, i $nnH, i 0x14)'
@@ -302,7 +262,82 @@
     !insertmacro nnPx $4 5
     System::Call 'user32::SetWindowPos(p r0, p 0, i r1, i r2, i r3, i r4, i 0x34)'
 
+    Call ${NN_UN}nnPath
+  FunctionEnd
+!macroend
+
+!macro customWelcomePage
+  Var nnAutostart
+  Var nnShortcut
+  Var nnLaunch
+  Var nnRow1
+  Var nnRow2
+  Var nnLaunchRow
+
+  !insertmacro nnCommon
+
+  Page custom nnWelcome
+
+  Function nnOnOff
+    Exch $0
+    ${If} $0 == 1
+      StrCpy $0 on
+    ${Else}
+      StrCpy $0 off
+    ${EndIf}
+    Exch $0
+  FunctionEnd
+
+  Function nnWelcome
+    Call nnPrepare
+    Call nnChrome
+    nsDialogs::Create 1018
+    Pop $nnDlg
+    !insertmacro nnColors $nnDlg
     Call nnPath
+    !insertmacro nnWidth $R0 PRIMARY
+    !insertmacro nnWidth $R1 CANCEL
+    IntOp $R2 528 - $R0
+    IntOp $R3 $R2 - 12
+    IntOp $R3 $R3 - $R1
+
+    Push $nnAutostart
+    Call nnOnOff
+    Pop $0
+    !insertmacro nnClickable $nnRow1 22 166 "row1-$0.bmp" nnToggleAutostart
+    Push $nnShortcut
+    Call nnOnOff
+    Pop $0
+    !insertmacro nnClickable $nnRow2 22 210 "row2-$0.bmp" nnToggleShortcut
+    !insertmacro nnClickable $0 512 16 "close.bmp" nnCancel
+    !insertmacro nnClickable $0 $R3 337 "cancel.bmp" nnCancel
+    !insertmacro nnClickable $0 $R2 337 "install.bmp" nnNext
+
+    Push welcome.bmp
+    Call nnBackground
+    nsDialogs::Show
+  FunctionEnd
+
+  Function nnToggleAutostart
+    Pop $0
+    IntOp $nnAutostart $nnAutostart ^ 1
+    Push $nnAutostart
+    Call nnOnOff
+    Pop $0
+    ${NSD_SetImage} $nnRow1 "$PLUGINSDIR\nn\row1-$0.bmp" $1
+  FunctionEnd
+
+  Function nnToggleShortcut
+    Pop $0
+    IntOp $nnShortcut $nnShortcut ^ 1
+    Push $nnShortcut
+    Call nnOnOff
+    Pop $0
+    ${NSD_SetImage} $nnRow2 "$PLUGINSDIR\nn\row2-$0.bmp" $1
+  FunctionEnd
+
+  Function nnInstShow
+    Call nnProgress
     Push $nnAutostart
     Call nnOnOff
     Pop $0
@@ -321,12 +356,7 @@
     Pop $nnDlg
     !insertmacro nnColors $nnDlg
     Call nnPath
-
-    ${If} $nnLang == tr
-      StrCpy $R0 ${NN_FINISH_W_tr}
-    ${Else}
-      StrCpy $R0 ${NN_FINISH_W_en}
-    ${EndIf}
+    !insertmacro nnWidth $R0 FINISH
     IntOp $R2 528 - $R0
 
     Push $nnLaunch
@@ -355,5 +385,64 @@
       ${StdUtils.ExecShellAsUser} $0 "$launchLink" "open" ""
     ${EndIf}
     SendMessage $HWNDPARENT ${WM_COMMAND} 1 0
+  FunctionEnd
+!macroend
+
+!macro customUnWelcomePage
+  !insertmacro nnCommon
+
+  UninstPage custom un.nnUnWelcome
+  !include "uninstfiles.nsh"
+
+  Function un.nnUnWelcome
+    Call un.nnPrepare
+    Call un.nnChrome
+    nsDialogs::Create 1018
+    Pop $nnDlg
+    !insertmacro nnColors $nnDlg
+    Call un.nnPath
+    !insertmacro nnWidth $R0 UNINSTALL
+    !insertmacro nnWidth $R1 CANCEL
+    IntOp $R2 528 - $R0
+    IntOp $R3 $R2 - 12
+    IntOp $R3 $R3 - $R1
+
+    !insertmacro nnClickable $0 512 16 "close.bmp" un.nnCancel
+    !insertmacro nnClickable $0 $R3 337 "cancel.bmp" un.nnCancel
+    !insertmacro nnClickable $0 $R2 337 "uninstall.bmp" un.nnNext
+
+    Push unwelcome.bmp
+    Call un.nnBackground
+    nsDialogs::Show
+  FunctionEnd
+
+  Function un.nnUnShow
+    Call un.nnProgress
+    !insertmacro nnStatic 0 0 "uninstalling.bmp"
+    System::Call 'user32::SetWindowPos(p R6, p 1, i 0, i 0, i 0, i 0, i 0x13)'
+  FunctionEnd
+!macroend
+
+!macro customUninstallPage
+  UninstPage custom un.nnUnFinish
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE un.nnSkip
+
+  Function un.nnUnFinish
+    Call un.nnChrome
+    nsDialogs::Create 1018
+    Pop $nnDlg
+    !insertmacro nnColors $nnDlg
+    Call un.nnPath
+    !insertmacro nnWidth $R0 FINISH
+    IntOp $R2 528 - $R0
+    !insertmacro nnClickable $0 $R2 337 "done.bmp" un.nnNext
+
+    Push unfinish.bmp
+    Call un.nnBackground
+    nsDialogs::Show
+  FunctionEnd
+
+  Function un.nnSkip
+    Abort
   FunctionEnd
 !macroend

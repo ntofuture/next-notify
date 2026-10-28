@@ -121,6 +121,11 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
 
     'setup.open': 'Kurulum',
     'setup.close': 'Kapat',
+    'window.minimize': 'Simge durumuna küçült',
+    'window.maximize': 'Ekranı kapla',
+    'window.close': 'Kapat',
+    'footer.version': 'Sürüm {version}',
+    'footer.rights': '© 2026 Next to Future. Tüm hakları saklıdır.',
     'setup.title': 'kurulum',
     'setup.intro': 'Claude Code, Codex, Cursor, Gemini CLI ve OpenCode her olayı hook’larla bu bilgisayarda çalışan Next Notify’a gönderir; uygulama da onu bildirime çevirir. Tasarım ve ayarlar tüm araçlar için ortaktır.',
     'setup.step.app': 'Next Notify açık kalsın',
@@ -269,6 +274,11 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
 
     'setup.open': 'Setup',
     'setup.close': 'Close',
+    'window.minimize': 'Minimize',
+    'window.maximize': 'Maximize',
+    'window.close': 'Close',
+    'footer.version': 'Version {version}',
+    'footer.rights': '© 2026 Next to Future. All rights reserved.',
     'setup.title': 'setup',
     'setup.intro': 'Claude Code, Codex, Cursor, Gemini CLI and OpenCode send every event through hooks to Next Notify running on this computer, and the app turns it into a notification. Design and settings are shared by every agent.',
     'setup.step.app': 'Keep Next Notify running',

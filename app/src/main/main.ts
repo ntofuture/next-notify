@@ -2,9 +2,9 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, net, protocol, Tray } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, net, protocol, screen, shell, Tray } from 'electron'
 import updater from 'electron-updater'
-import type { Agent, Category, Config, Hook, LogEntry, LogStatus, PluginStatus, Sample, ServerStatus, State, TrayAction } from '../types.js'
+import type { Agent, Category, Config, Hook, LogEntry, LogStatus, PluginStatus, Sample, ServerStatus, State, TrayAction, WindowAction } from '../types.js'
 import { DEFAULTS, loadConfig, merge, resetConfig, saveConfig } from './config.js'
 import { buildNote, normalize } from './hook.js'
 import { clientPid, focusOrigin, resolveOrigin, type Origin } from './origin.js'
@@ -179,6 +179,41 @@ function systemSounds() {
   }
 }
 
+const toggleMaximize = (win: BrowserWindow) => (win.isMaximized() ? win.unmaximize() : win.maximize())
+
+function trackCorner(win: BrowserWindow) {
+  const NEAR = 40
+  const OUT = 10
+  let corner = ''
+  let resizing = false
+  let timer: NodeJS.Timeout | undefined
+  const send = (next: string) => {
+    if (next === corner || win.isDestroyed()) return
+    corner = next
+    win.webContents.send('window:corner', next)
+  }
+  const check = () => {
+    if (resizing) return
+    if (win.isMaximized()) return send('')
+    const b = win.getBounds()
+    const p = screen.getCursorScreenPoint()
+    const x = p.x >= b.x - OUT && p.x < b.x + NEAR ? 'l' : p.x > b.x + b.width - NEAR && p.x <= b.x + b.width + OUT ? 'r' : ''
+    const y = p.y >= b.y - OUT && p.y < b.y + NEAR ? 't' : p.y > b.y + b.height - NEAR && p.y <= b.y + b.height + OUT ? 'b' : ''
+    send(x && y ? y + x : '')
+  }
+  win.on('focus', () => {
+    clearInterval(timer)
+    timer = setInterval(check, 50)
+  })
+  win.on('blur', () => {
+    clearInterval(timer)
+    send('')
+  })
+  win.on('will-resize', () => (resizing = true))
+  win.on('resized', () => (resizing = false))
+  win.on('closed', () => clearInterval(timer))
+}
+
 function openDashboard() {
   if (dashboard) {
     if (dashboard.isMinimized()) dashboard.restore()
@@ -187,6 +222,7 @@ function openDashboard() {
     return
   }
   if (process.platform === 'darwin') app.dock?.show()
+  const transparent = process.platform === 'win32'
   const win = new BrowserWindow({
     width: 1320,
     height: 860,
@@ -195,12 +231,23 @@ function openDashboard() {
     show: false,
     title: 'Next Notify',
     icon: ICON,
-    backgroundColor: cfg.theme === 'light' ? '#f1f3f8' : '#05070c',
+    backgroundColor: transparent ? '#00000000' : cfg.theme === 'light' ? '#f1f3f8' : '#05070c',
     autoHideMenuBar: true,
+    ...(process.platform === 'darwin' ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 26, y: 28 } } : { frame: false, transparent }),
     webPreferences: { preload: PRELOAD, sandbox: true, contextIsolation: true },
   })
   dashboard = win
   win.once('ready-to-show', () => win.show())
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('https://')) shell.openExternal(url)
+    return { action: 'deny' }
+  })
+  win.on('maximize', () => win.webContents.send('window:maximized', true))
+  win.on('unmaximize', () => win.webContents.send('window:maximized', false))
+  if (transparent) {
+    trackCorner(win)
+    win.hookWindowMessage(0x112, (wParam) => wParam.readUInt32LE(0) === 0xf032 && toggleMaximize(win))
+  }
   win.on('closed', () => {
     dashboard = null
     if (process.platform === 'darwin') app.dock?.hide()
@@ -308,6 +355,12 @@ ipcMain.handle('pick-sound', async () => {
 })
 ipcMain.handle('clear-events', () => {
   events.length = 0
+})
+ipcMain.on('window', (e, action: WindowAction) => {
+  if (!dashboard || e.sender !== dashboard.webContents) return
+  if (action === 'minimize') dashboard.minimize()
+  else if (action === 'maximize') toggleMaximize(dashboard)
+  else dashboard.close()
 })
 ipcMain.on('popup:ready', (e, height: number) => popupReady(e.sender, height))
 ipcMain.on('popup:click', (e) => {

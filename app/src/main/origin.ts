@@ -2,6 +2,7 @@ import { execFile } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { shell } from 'electron'
+import { projectRoot } from './hook.js'
 
 export type Origin = { protocol: string; pids: number[] } | { win: number } | { app: string } | null
 type Proc = { pid: number; exe: string; win?: number }
@@ -13,8 +14,8 @@ const ps = (script: string) => run('powershell.exe', ['-NoProfile', '-NonInterac
 export async function clientPid(port: number, serverPort: number) {
   if (process.platform === 'win32') {
     const out = await run('netstat', ['-ano', '-p', 'TCP'])
-    const line = out.split('\n').find((l) => l.includes(`127.0.0.1:${port} `) && l.includes(`127.0.0.1:${serverPort} `))
-    return Number(line?.trim().split(/\s+/).pop()) || null
+    const cols = out.split('\n').map((l) => l.trim().split(/\s+/)).find((c) => c[1] === `127.0.0.1:${port}` && c[2] === `127.0.0.1:${serverPort}`)
+    return Number(cols?.[4]) || null
   }
   if (process.platform === 'darwin') {
     const out = await run('lsof', ['-nP', `-iTCP:${port}`, '-sTCP:ESTABLISHED', '-Fp'])
@@ -27,9 +28,11 @@ export async function clientPid(port: number, serverPort: number) {
 async function ancestors(pid: number) {
   const chain: Proc[] = []
   if (process.platform === 'win32') {
-    const out = await ps(`$all = @{}; Get-CimInstance Win32_Process -Property ProcessId,ParentProcessId,ExecutablePath | ForEach-Object { $all[[int]$_.ProcessId] = $_ }
+    const out = await ps(`Add-Type -Namespace NN -Name P -MemberDefinition '[DllImport("kernel32.dll")] static extern IntPtr OpenProcess(uint a, bool i, int p); [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern bool QueryFullProcessImageName(IntPtr h, int f, System.Text.StringBuilder s, ref int n); [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr h);
+public static string Exe(int pid) { var h = OpenProcess(0x1000, false, pid); if (h == IntPtr.Zero) return ""; var s = new System.Text.StringBuilder(1024); int n = s.Capacity; var ok = QueryFullProcessImageName(h, 0, s, ref n); CloseHandle(h); return ok ? s.ToString() : ""; }'
+$all = @{}; Get-CimInstance Win32_Process -Property ProcessId,ParentProcessId | ForEach-Object { $all[[int]$_.ProcessId] = $_ }
 $id = ${pid}; $n = 0
-while ($all.ContainsKey($id) -and $n -lt 16) { $p = $all[$id]; "$id|$($p.ExecutablePath)|$((Get-Process -Id $id -ErrorAction SilentlyContinue).MainWindowHandle)"; $id = [int]$p.ParentProcessId; $n++ }`)
+while ($all.ContainsKey($id) -and $n -lt 16) { $p = $all[$id]; "$id|$([NN.P]::Exe($id))|$((Get-Process -Id $id -ErrorAction SilentlyContinue).MainWindowHandle)"; $id = [int]$p.ParentProcessId; $n++ }`)
     for (const line of out.trim().split(/\r?\n/).filter(Boolean)) {
       const [id, exe, win] = line.split('|')
       chain.push({ pid: Number(id), exe, win: Number(win) || 0 })
@@ -129,7 +132,7 @@ export async function focusOrigin(origin: Origin, cwd: string) {
   if ('protocol' in origin) {
     if (!cwd) return
     if (process.platform === 'win32' && (await focusWindow(origin.pids, cwd)) !== 'none') return
-    const target = `/${cwd.replace(/\\/g, '/').replace(/^\/+/, '')}`
+    const target = `/${projectRoot(cwd).replace(/\\/g, '/').replace(/^\/+/, '')}`
     return shell.openExternal(encodeURI(`${origin.protocol}://file${target}`)).catch(() => {})
   }
   if ('app' in origin) return run('open', ['-a', origin.app])
