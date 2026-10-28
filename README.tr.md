@@ -181,7 +181,10 @@ npm run icons      # uygulama ve tepsi simgelerini yeniden üretir
 npm run installer  # Windows kurulum ekranlarını yeniden çizer (dist içinde çalışır)
 ```
 
-`installer/build.bat` (Windows) ve `installer/build.sh` (macOS, Linux) sürümü sorar, uygulamayı nvm'deki Node.js 24.14.0 ile derler ve yüklenecek dosyaları `installer/` klasörüne kopyalar.
+`build.bat` (Windows) ve `build.sh` (macOS, Linux) uygulamayı nvm'deki Node.js 24.14.0 ile derler ve ne üretileceğini sorar:
+
+- **Build**: kurulumsuz uygulama klasörünü lokalde denemek için `publish/` klasörüne kopyalar.
+- **Installer**: sürümü sorar, yüklenecek installer ve güncelleme dosyalarını `installer/` klasörüne kopyalar.
 
 `v*` biçiminde bir etiket gönderildiğinde `.github/workflows/release.yml` çalışır; üç platformun installer'larını derleyip taslak bir release'e ekler.
 

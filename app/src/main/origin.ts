@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { shell } from 'electron'
 
-export type Origin = { protocol: string } | { win: number } | { app: string } | null
+export type Origin = { protocol: string; pids: number[] } | { win: number } | { app: string } | null
 type Proc = { pid: number; exe: string; win?: number }
 
 const run = (file: string, args: string[]) =>
@@ -83,7 +83,7 @@ export async function resolveOrigin(pid: number | null): Promise<Origin> {
   const chain = await ancestors(pid)
   for (const p of chain) {
     const protocol = editorProtocol(p.exe)
-    if (protocol) return { protocol }
+    if (protocol) return { protocol, pids: chain.filter((c) => c.exe === p.exe).map((c) => c.pid) }
   }
   if (process.platform === 'win32') {
     const win = chain.find((p) => p.win)?.win
@@ -96,18 +96,47 @@ export async function resolveOrigin(pid: number | null): Promise<Origin> {
   return null
 }
 
-export function focusOrigin(origin: Origin, cwd: string) {
+const USER32 = `Add-Type -Namespace NN -Name W -MemberDefinition '[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c); [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h); [DllImport("user32.dll")] public static extern void keybd_event(byte k, byte s, uint f, UIntPtr e);
+public delegate bool CB(IntPtr h, IntPtr l);
+[DllImport("user32.dll")] static extern bool EnumWindows(CB cb, IntPtr l);
+[DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+[DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowText(IntPtr h, System.Text.StringBuilder s, int n);
+[DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint p);
+public static IntPtr Find(uint[] pids, string[] names) {
+  var wins = new System.Collections.Generic.List<System.Tuple<IntPtr, string[]>>();
+  EnumWindows((h, l) => {
+    uint p; GetWindowThreadProcessId(h, out p);
+    if (IsWindowVisible(h) && Array.IndexOf(pids, p) >= 0) { var s = new System.Text.StringBuilder(512); GetWindowText(h, s, 512); wins.Add(System.Tuple.Create(h, s.ToString().Split(new[] { " - " }, StringSplitOptions.None))); }
+    return true;
+  }, IntPtr.Zero);
+  foreach (var n in names) foreach (var w in wins) foreach (var part in w.Item2) if (string.Equals(part.Trim(), n, StringComparison.OrdinalIgnoreCase)) return w.Item1;
+  return IntPtr.Zero;
+}'`
+
+const FOCUS = `if ([NN.W]::IsIconic($h)) { [void][NN.W]::ShowWindow($h, 9) }
+[NN.W]::keybd_event(0x12, 0, 0, [UIntPtr]::Zero); [NN.W]::keybd_event(0x12, 0, 2, [UIntPtr]::Zero)
+[void][NN.W]::SetForegroundWindow($h)`
+
+async function focusWindow(pids: number[], cwd: string) {
+  const names: string[] = []
+  for (let dir = cwd; path.dirname(dir) !== dir; dir = path.dirname(dir)) names.push(`'${path.basename(dir).replace(/'/g, "''")}'`)
+  const out = await ps(`${USER32}
+$h = [NN.W]::Find(@(${pids.join(',')}), @(${names.join(',')}))
+if ($h -eq [IntPtr]::Zero) { 'none' } else { ${FOCUS}; 'found' }`)
+  return out.trim()
+}
+
+export async function focusOrigin(origin: Origin, cwd: string) {
   if (!origin) return
   if ('protocol' in origin) {
     if (!cwd) return
+    if (process.platform === 'win32' && (await focusWindow(origin.pids, cwd)) !== 'none') return
     const target = `/${cwd.replace(/\\/g, '/').replace(/^\/+/, '')}`
     return shell.openExternal(encodeURI(`${origin.protocol}://file${target}`)).catch(() => {})
   }
   if ('app' in origin) return run('open', ['-a', origin.app])
   // Alt basışı Windows'un öne getirme kilidini açar.
-  return ps(`Add-Type -Namespace NN -Name W -MemberDefinition '[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c); [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h); [DllImport("user32.dll")] public static extern void keybd_event(byte k, byte s, uint f, UIntPtr e);'
+  return ps(`${USER32}
 $h = [IntPtr]${origin.win}
-if ([NN.W]::IsIconic($h)) { [void][NN.W]::ShowWindow($h, 9) }
-[NN.W]::keybd_event(0x12, 0, 0, [UIntPtr]::Zero); [NN.W]::keybd_event(0x12, 0, 2, [UIntPtr]::Zero)
-[void][NN.W]::SetForegroundWindow($h)`)
+${FOCUS}`)
 }
