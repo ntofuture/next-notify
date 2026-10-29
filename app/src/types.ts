@@ -98,10 +98,10 @@ export type NnApi = {
   onMaximized: (cb: (maximized: boolean) => void) => void
   onCorner: (cb: (corner: string) => void) => void
 
-  onShow: (cb: (data: { note: CardNote; popup: PopupConfig }) => void) => void
-  ready: (height: number) => void
-  click: () => void
-  close: () => void
+  onShow: (cb: (data: { id: number; note: CardNote; popup: PopupConfig; room: number }) => void) => void
+  resize: (height: number) => void
+  click: (id: number) => void
+  close: (id: number) => void
 
   onPlay: (cb: (data: { spec: string; volume: number }) => void) => void
 

@@ -15,9 +15,9 @@ const api: NnApi = {
   onCorner: (cb) => ipcRenderer.on('window:corner', (_e, corner) => cb(corner)),
 
   onShow: (cb) => ipcRenderer.on('popup:show', (_e, data) => cb(data)),
-  ready: (height) => ipcRenderer.send('popup:ready', height),
-  click: () => ipcRenderer.send('popup:click'),
-  close: () => ipcRenderer.send('popup:close'),
+  resize: (height) => ipcRenderer.send('popup:resize', height),
+  click: (id) => ipcRenderer.send('popup:click', id),
+  close: (id) => ipcRenderer.send('popup:close', id),
 
   onPlay: (cb) => ipcRenderer.on('audio:play', (_e, data) => cb(data)),
 

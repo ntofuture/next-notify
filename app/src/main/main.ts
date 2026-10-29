@@ -8,7 +8,7 @@ import type { Agent, Category, Config, Hook, LogEntry, LogStatus, PluginStatus, 
 import { DEFAULTS, loadConfig, merge, resetConfig, saveConfig } from './config.js'
 import { buildNote, normalize } from './hook.js'
 import { clientPid, focusOrigin, resolveOrigin, type Origin } from './origin.js'
-import { entryFor, popupReady, showPopup } from './popups.js'
+import { entryFor, popupClose, popupResize, showPopup } from './popups.js'
 import { startServer } from './server.js'
 import { hideTrayMenu, isTrayMenu, placeTrayMenu, showTrayMenu } from './traymenu.js'
 import { translator } from '../renderer/shared/i18n.js'
@@ -362,12 +362,12 @@ ipcMain.on('window', (e, action: WindowAction) => {
   else if (action === 'maximize') toggleMaximize(dashboard)
   else dashboard.close()
 })
-ipcMain.on('popup:ready', (e, height: number) => popupReady(e.sender, height))
-ipcMain.on('popup:click', (e) => {
-  const entry = entryFor(e.sender)
+ipcMain.on('popup:resize', (e, height: number) => popupResize(e.sender, height))
+ipcMain.on('popup:click', (_e, id: number) => {
+  const entry = entryFor(id)
   if (entry) openOrigin(entry.origin, entry.note.cwd)
 })
-ipcMain.on('popup:close', (e) => entryFor(e.sender)?.win.close())
+ipcMain.on('popup:close', (e, id: number) => popupClose(e.sender, id))
 
 ipcMain.on('tray:size', (e, height: number) => isTrayMenu(e.sender) && placeTrayMenu(height))
 ipcMain.on('tray:action', (e, action: TrayAction) => {

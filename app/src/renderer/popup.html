@@ -7,10 +7,32 @@
   <link rel="stylesheet" href="shared/fonts.css">
   <link rel="stylesheet" href="shared/card.css">
   <style>
-    html, body { margin: 0; background: transparent; overflow: hidden; }
-    body { display: flex; justify-content: center; padding: 28px; }
+    html, body { height: 100%; margin: 0; background: transparent; overflow: hidden; }
+    body { display: flex; flex-direction: column; }
+    body[data-pos^="bottom"] { justify-content: flex-end; }
     .nn-shell { opacity: 0; }
     .nn-shell.in, .nn-shell.out { opacity: 1; }
+
+    .nn-stack { flex: none; box-sizing: border-box; padding: 28px; overflow: hidden; scrollbar-width: none; }
+    .nn-stack::-webkit-scrollbar { display: none; }
+    .nn-stack.open { overflow-y: auto; }
+    .nn-stack.clip { mask-image: linear-gradient(transparent, #000 16px, #000 calc(100% - 16px), transparent); }
+    body[data-pos^="top"] .nn-stack { padding-top: 16px; }
+    body[data-pos^="bottom"] .nn-stack { display: flex; flex-direction: column-reverse; }
+    .nn-deck { position: relative; flex: none; margin: 0 auto; transition: height 0.45s cubic-bezier(0.19, 1, 0.22, 1); }
+
+    .nn-slot { position: absolute; left: 0; right: 0; display: flex; transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s ease; }
+    body[data-pos^="top"] .nn-slot { top: 0; transform-origin: bottom; }
+    body[data-pos^="bottom"] .nn-slot { bottom: 0; transform-origin: top; }
+    .nn-slot.behind { pointer-events: none; }
+    .nn-slot.gone { opacity: 0; }
+    .nn-slot .nn-card { transition: height 0.45s cubic-bezier(0.19, 1, 0.22, 1); }
+    .nn-slot .nn-card::after { content: ''; position: absolute; inset: 0; background: var(--nn-bg); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .nn-slot.behind .nn-card::after { opacity: 1; }
+    .nn-stack.open .nn-progress i { animation-play-state: paused; }
+    @media (prefers-reduced-motion: reduce) {
+      .nn-deck, .nn-slot, .nn-slot .nn-card, .nn-slot .nn-card::after { transition-duration: 0.01ms; }
+    }
   </style>
 </head>
 <body>
