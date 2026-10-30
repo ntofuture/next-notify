@@ -187,10 +187,11 @@ npm run icons      # regenerate the app and tray icons
 npm run installer  # redraw the Windows installer screens (runs as part of dist)
 ```
 
-`build.bat` (Windows) and `build.sh` (macOS, Linux) build the app with Node.js 24.14.0 from nvm and ask what to make:
+`deploy.bat` (Windows) and `deploy.sh` (macOS, Linux) build the app with Node.js 24.14.0 from nvm and ask what to do:
 
 - **Build**: the app folder without an installer, copied into `publish/` to try locally.
 - **Installer**: asks for the version and copies the installer and update files to upload into `installer/`.
+- **Upload**: runs `upload.bat` / `upload.sh`, which send `installer/` to the server. They hold the server credentials, so they are not in the repository.
 
 Pushing a `v*` tag runs `.github/workflows/release.yml`, which builds all three platforms and attaches the installers to a draft release.
 
@@ -203,7 +204,7 @@ app/src/main/                     Electron main process: server, agent hooks, po
 app/src/renderer/                 settings window, notification card, sounds
 app/build/installer.nsh           Windows installer screens (NSIS)
 app/scripts/                      icon and installer image generators
-build.bat, build.sh               build scripts (output: publish/, installer/)
+deploy.bat, deploy.sh             build and upload scripts (output: publish/, installer/)
 docs/                             README images
 ```
 

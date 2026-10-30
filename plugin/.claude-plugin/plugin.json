@@ -1,6 +1,6 @@
 {
   "name": "next-notify",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "Shows a desktop notification when Claude finishes, asks for permission or waits for input. Requires the Next Notify app.",
   "author": {
     "name": "Next to Future"
