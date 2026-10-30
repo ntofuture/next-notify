@@ -163,7 +163,7 @@ Your data stays on your machine. The app listens only on `127.0.0.1` and rejects
 
 ## Platform notes
 
-- **macOS:** the app isn't notarized yet. On first launch, right-click the app and choose **Open**, or run `xattr -cr "/Applications/Next Notify.app"`. macOS only installs updates for signed apps, so until then download new versions from Releases.
+- **macOS:** the app is signed and notarized by Apple, and updates install automatically like on Windows.
 - **Windows:** SmartScreen may warn about an unknown publisher. Choose **More info → Run anyway**.
 - **Linux:** the card needs a compositor for transparency (standard on GNOME and KDE). Start-at-login writes `~/.config/autostart/next-notify.desktop`.
 
@@ -193,7 +193,7 @@ npm run installer  # redraw the Windows installer screens (runs as part of dist)
 - **Installer**: asks for the version and copies the installer and update files to upload into `installer/`.
 - **Upload**: runs `upload.bat` / `upload.sh`, which send `installer/` to the server. They hold the server credentials, so they are not in the repository.
 
-Pushing a `v*` tag runs `.github/workflows/release.yml`, which builds all three platforms and attaches the installers to a draft release.
+Pushing a `v*` tag runs `.github/workflows/release.yml`, which builds all three platforms, signs and notarizes the macOS app, and publishes the release once every installer is attached.
 
 Automatic updates are read from `https://storage.nextofuture.com/applications/next-notify` (`build.publish` in `app/package.json`). For a new version, upload the installers to that folder together with `latest.yml`, `latest-mac.yml`, `latest-linux.yml`, the mac `.zip` and the `.blockmap` files, the `.yml` files last. The app compares the SHA-512 hash in the `.yml` file with the download before installing it.
 
