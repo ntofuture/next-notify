@@ -214,6 +214,26 @@ function trackCorner(win: BrowserWindow) {
   win.on('closed', () => clearInterval(timer))
 }
 
+function trackSnap(win: BrowserWindow) {
+  let grab: { x: number; y: number } | null = null
+  win.on('will-move', (e) => {
+    const p = screen.getCursorScreenPoint()
+    if (!grab) {
+      if (!win.isMaximized()) return
+      const max = win.getBounds()
+      win.unmaximize()
+      grab = { x: Math.round((win.getBounds().width * (p.x - max.x)) / max.width), y: p.y - max.y }
+    }
+    e.preventDefault()
+    win.setPosition(p.x - grab.x, p.y - grab.y)
+  })
+  win.on('moved', () => {
+    grab = null
+    const p = screen.getCursorScreenPoint()
+    if (p.y <= screen.getDisplayNearestPoint(p).bounds.y) win.maximize()
+  })
+}
+
 function openDashboard() {
   if (dashboard) {
     if (dashboard.isMinimized()) dashboard.restore()
@@ -246,6 +266,7 @@ function openDashboard() {
   win.on('unmaximize', () => win.webContents.send('window:maximized', false))
   if (transparent) {
     trackCorner(win)
+    trackSnap(win)
     win.hookWindowMessage(0x112, (wParam) => wParam.readUInt32LE(0) === 0xf032 && toggleMaximize(win))
   }
   win.on('closed', () => {
