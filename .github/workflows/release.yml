@@ -9,7 +9,19 @@ permissions:
   contents: write
 
 jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          VERSION=$(node -p "require('./app/package.json').version")
+          gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 ||
+            gh release create "v$VERSION" --repo "$GITHUB_REPOSITORY" --draft --title "$VERSION" --target "$GITHUB_SHA"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
+    needs: draft
     strategy:
       fail-fast: false
       matrix:
