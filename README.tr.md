@@ -163,7 +163,7 @@ Verileriniz bilgisayarınızda kalır. Uygulama yalnızca `127.0.0.1` adresini d
 
 ## Platform notları
 
-- **macOS:** uygulama henüz Apple tarafından onaylanmadı (notarization). İlk açılışta uygulamaya sağ tıklayıp **Aç**'ı seçin ya da `xattr -cr "/Applications/Next Notify.app"` komutunu çalıştırın. macOS yalnızca imzalı uygulamalara güncelleme kurar; o zamana kadar yeni sürümleri Releases sayfasından indirin.
+- **macOS:** uygulama Apple tarafından imzalanmış ve onaylanmıştır (notarization); güncellemeler Windows'taki gibi kendiliğinden kurulur.
 - **Windows:** SmartScreen "bilinmeyen yayıncı" uyarısı verebilir. **Ek bilgi → Yine de çalıştır**'ı seçin.
 - **Linux:** kartın saydam görünmesi için bir pencere birleştirici gerekir (GNOME ve KDE'de varsayılan olarak bulunur). Oturum açılınca başlatma `~/.config/autostart/next-notify.desktop` dosyasını yazar.
 
@@ -193,7 +193,7 @@ npm run installer  # Windows kurulum ekranlarını yeniden çizer (dist içinde 
 - **Installer**: sürümü sorar, yüklenecek installer ve güncelleme dosyalarını `installer/` klasörüne kopyalar.
 - **Upload**: `installer/` klasörünü sunucuya gönderen `upload.bat` / `upload.sh` dosyasını çalıştırır. Bu dosyalar sunucu erişim bilgilerini içerdiği için depoda yer almaz.
 
-`v*` biçiminde bir etiket gönderildiğinde `.github/workflows/release.yml` çalışır; üç platformun installer'larını derleyip taslak bir release'e ekler.
+`v*` biçiminde bir etiket gönderildiğinde `.github/workflows/release.yml` çalışır; üç platformun installer'larını derler, macOS uygulamasını imzalayıp noter onayından geçirir ve tüm installer'lar eklenince release'i yayınlar.
 
 Otomatik güncellemeler `https://storage.nextofuture.com/applications/next-notify` adresinden okunur (`app/package.json` içinde `build.publish`). Yeni bir sürüm için installer'ları `latest.yml`, `latest-mac.yml`, `latest-linux.yml`, mac `.zip` ve `.blockmap` dosyalarıyla birlikte bu klasöre yükleyin; `.yml` dosyalarını en son yükleyin. Uygulama kurmadan önce indirilen dosyayı `.yml` içindeki SHA-512 özetiyle karşılaştırır.
 
