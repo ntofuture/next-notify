@@ -75,12 +75,13 @@ function close(slot: Slot) {
   slot.el.style.zIndex = String(MAX + 2)
   slot.shell.classList.remove('in')
   slot.shell.classList.add('out')
-  slot.shell.addEventListener('animationend', function done(e) {
-    if (e.target !== slot.shell) return
-    slot.shell.removeEventListener('animationend', done)
+  const done = () => {
+    if (!slot.el.isConnected) return
     slot.el.remove()
     window.nn.close(slot.id)
-  })
+  }
+  slot.shell.addEventListener('animationend', (e) => e.target === slot.shell && done())
+  setTimeout(done, 400)
   layout()
 }
 

@@ -12,7 +12,7 @@ exit /b %code%
 
 param(
     [string]$Version,
-    [string]$DownloadBase = 'https://storage.nextofuture.com/applications/next-notify',
+    [string]$DownloadBase = 'https://cdn.nextofuture.com.tr/nextofuture/applications/next-notify',
     [string]$Mode
 )
 

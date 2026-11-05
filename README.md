@@ -195,7 +195,7 @@ npm run installer  # redraw the Windows installer screens (runs as part of dist)
 
 Pushing a `v*` tag runs `.github/workflows/release.yml`, which builds all three platforms, signs and notarizes the macOS app, and publishes the release once every installer is attached.
 
-Automatic updates are read from `https://storage.nextofuture.com/applications/next-notify` (`build.publish` in `app/package.json`). For a new version, upload the installers to that folder together with `latest.yml`, `latest-mac.yml`, `latest-linux.yml`, the mac `.zip` and the `.blockmap` files, the `.yml` files last. The app compares the SHA-512 hash in the `.yml` file with the download before installing it.
+Automatic updates are read from `https://cdn.nextofuture.com.tr/nextofuture/applications/next-notify` (`build.publish` in `app/package.json`). For a new version, upload the installers to that folder together with `latest.yml`, `latest-mac.yml`, `latest-linux.yml`, the mac `.zip` and the `.blockmap` files, the `.yml` files last. The app compares the SHA-512 hash in the `.yml` file with the download before installing it.
 
 ```
 .claude-plugin/marketplace.json   marketplace (points to ./plugin)

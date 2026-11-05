@@ -2,13 +2,13 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, net, protocol, screen, shell, Tray } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, net, powerMonitor, protocol, screen, shell, Tray } from 'electron'
 import updater from 'electron-updater'
 import type { Agent, Category, Config, Hook, LogEntry, LogStatus, PluginStatus, Sample, ServerStatus, State, TrayAction, WindowAction } from '../types.js'
 import { DEFAULTS, loadConfig, merge, resetConfig, saveConfig } from './config.js'
 import { buildNote, normalize } from './hook.js'
 import { clientPid, focusOrigin, resolveOrigin, type Origin } from './origin.js'
-import { entryFor, popupClose, popupResize, showPopup } from './popups.js'
+import { entryFor, popupClose, popupResize, refreshPopups, showPopup } from './popups.js'
 import { startServer } from './server.js'
 import { hideTrayMenu, isTrayMenu, placeTrayMenu, showTrayMenu } from './traymenu.js'
 import { translator } from '../renderer/shared/i18n.js'
@@ -428,6 +428,8 @@ app.whenReady().then(() => {
   audioHost = createAudioHost()
   syncAutostart()
   server = startServer(PORT, { hook: onHook, test, open: openDashboard, version: app.getVersion() })
+  powerMonitor.on('resume', refreshPopups)
+  powerMonitor.on('unlock-screen', refreshPopups)
 
   const updated = fs.existsSync(UPDATED())
   fs.rmSync(UPDATED(), { force: true })

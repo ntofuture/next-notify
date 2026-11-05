@@ -5,7 +5,7 @@ import type { Origin } from './origin.js'
 const PAD = 28
 const MARGIN = 16
 
-type Entry = { note: Note; origin: Promise<Origin> | null }
+type Entry = { note: Note; origin: Promise<Origin> | null; cfg: Config; url: string; preload: string; icon: string }
 type Stack = { key: string; win: BrowserWindow; display: Display; position: string; ids: Set<number>; loaded: Promise<void> }
 
 const stacks = new Map<string, Stack>()
@@ -16,12 +16,28 @@ export const entryFor = (id: number) => entries.get(id)
 
 const stackFor = (sender: WebContents) => [...stacks.values()].find((s) => s.win.webContents === sender)
 
-export function showPopup({ note, origin, cfg, url, preload, icon }: { note: Note; origin: Promise<Origin> | null; cfg: Config; url: string; preload: string; icon: string }) {
-  const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
+export function showPopup(entry: Entry) {
+  const id = ++lastId
+  entries.set(id, entry)
+  place(id, screen.getDisplayNearestPoint(screen.getCursorScreenPoint()))
+}
+
+export function refreshPopups() {
+  const cursor = screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
+  for (const stack of [...stacks.values()]) {
+    const ids = [...stack.ids]
+    stack.ids.clear()
+    stacks.delete(stack.key)
+    stack.win.destroy()
+    const display = screen.getAllDisplays().find((d) => d.id === stack.display.id) ?? cursor
+    for (const id of ids) place(id, display)
+  }
+}
+
+function place(id: number, display: Display) {
+  const { note, cfg, url, preload, icon } = entries.get(id)!
   const key = `${display.id}:${cfg.popup.position}:${cfg.popup.width}`
   const stack = stacks.get(key) ?? openStack(key, display, cfg, url, preload, icon)
-  const id = ++lastId
-  entries.set(id, { note, origin })
   stack.ids.add(id)
   const room = display.workArea.height - MARGIN + PAD
   stack.loaded.then(() => {

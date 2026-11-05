@@ -195,7 +195,7 @@ npm run installer  # Windows kurulum ekranlarını yeniden çizer (dist içinde 
 
 `v*` biçiminde bir etiket gönderildiğinde `.github/workflows/release.yml` çalışır; üç platformun installer'larını derler, macOS uygulamasını imzalayıp noter onayından geçirir ve tüm installer'lar eklenince release'i yayınlar.
 
-Otomatik güncellemeler `https://storage.nextofuture.com/applications/next-notify` adresinden okunur (`app/package.json` içinde `build.publish`). Yeni bir sürüm için installer'ları `latest.yml`, `latest-mac.yml`, `latest-linux.yml`, mac `.zip` ve `.blockmap` dosyalarıyla birlikte bu klasöre yükleyin; `.yml` dosyalarını en son yükleyin. Uygulama kurmadan önce indirilen dosyayı `.yml` içindeki SHA-512 özetiyle karşılaştırır.
+Otomatik güncellemeler `https://cdn.nextofuture.com.tr/nextofuture/applications/next-notify` adresinden okunur (`app/package.json` içinde `build.publish`). Yeni bir sürüm için installer'ları `latest.yml`, `latest-mac.yml`, `latest-linux.yml`, mac `.zip` ve `.blockmap` dosyalarıyla birlikte bu klasöre yükleyin; `.yml` dosyalarını en son yükleyin. Uygulama kurmadan önce indirilen dosyayı `.yml` içindeki SHA-512 özetiyle karşılaştırır.
 
 ## Lisans
 

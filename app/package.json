@@ -1,7 +1,7 @@
 {
   "name": "next-notify",
   "productName": "Next Notify",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Desktop notifications for Claude Code, Codex, Cursor, Gemini CLI and OpenCode",
   "author": "Next to Future",
   "license": "MIT",
@@ -55,7 +55,7 @@
     "publish": [
       {
         "provider": "generic",
-        "url": "https://storage.nextofuture.com/applications/next-notify"
+        "url": "https://cdn.nextofuture.com.tr/nextofuture/applications/next-notify"
       },
       {
         "provider": "github",

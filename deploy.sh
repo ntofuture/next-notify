@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-DOWNLOAD_BASE='https://storage.nextofuture.com/applications/next-notify'
+DOWNLOAD_BASE='https://cdn.nextofuture.com.tr/nextofuture/applications/next-notify'
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 APP="$ROOT/app"
 DIST="$APP/dist"
