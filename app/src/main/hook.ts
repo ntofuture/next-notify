@@ -43,17 +43,18 @@ export function projectRoot(cwd: string) {
 
 export function plainText(text: string | undefined, max: number) {
   if (!text) return ''
-  let t = String(text)
+  const t = String(text)
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
     .replace(/[#*_`>|]+/g, '')
     .replace(/\s+/g, ' ')
     .trim()
-  if (max > 0 && t.length > max) t = `${t.slice(0, max).trimEnd()}…`
-  return t
+  return clip(t, max)
 }
 
-function transcriptTail(file: string) {
+const clip = (text: string, max: number) => (max > 0 && text.length > max ? `${text.slice(0, max).trimEnd()}…` : text)
+
+function tailLines(file: string) {
   let fd: number | undefined
   try {
     fd = fs.openSync(file, 'r')
@@ -61,22 +62,46 @@ function transcriptTail(file: string) {
     const len = Math.min(size, 512 * 1024)
     const buf = Buffer.alloc(len)
     fs.readSync(fd, buf, 0, len, size - len)
-    const lines = buf.toString('utf8').split('\n')
-    for (let i = lines.length - 1; i >= 0; i--) {
-      if (!lines[i].includes('"assistant"')) continue
-      try {
-        const o = JSON.parse(lines[i])
-        if (o.type !== 'assistant') continue
-        const content: { type: string; text?: string }[] = o.message?.content ?? []
-        const text = content.filter((c) => c.type === 'text').map((c) => c.text).join(' ')
-        if (text) return text
-      } catch {}
-    }
+    return buf.toString('utf8').split('\n')
   } catch {
+    return []
   } finally {
     if (fd !== undefined) fs.closeSync(fd)
   }
-  return ''
+}
+
+function lastAssistant<T>(file: string, pick: (content: Raw[]) => T | undefined) {
+  const lines = tailLines(file)
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (!lines[i].includes('"assistant"')) continue
+    try {
+      const o = JSON.parse(lines[i])
+      if (o.type !== 'assistant') continue
+      const found = pick(o.message?.content ?? [])
+      if (found) return found
+    } catch {}
+  }
+}
+
+const transcriptTail = (file: string) => lastAssistant(file, (content) => content.filter((c) => c.type === 'text').map((c) => c.text).join(' ')) ?? ''
+const toolInput = (file: string, tool: string) => lastAssistant<Raw>(file, (content) => content.findLast((c) => c.type === 'tool_use' && c.name === tool)?.input)
+
+const NEEDS = /^Claude needs (?:your )?permission to use (.+)$/i
+const WAITING = /^Claude is waiting for your input$/i
+
+function localize(message: string, t: Translate) {
+  const tool = message.match(NEEDS)?.[1]
+  if (tool) return t('msg.permission', { tool })
+  return WAITING.test(message) ? t('msg.idle') : message
+}
+
+function asked(hook: Hook, max: number) {
+  const tool = hook.message?.trim().match(NEEDS)?.[1]
+  const input = tool && hook.transcript_path ? toolInput(hook.transcript_path, tool) : undefined
+  if (!input) return ''
+  if (Array.isArray(input.questions)) return plainText(input.questions.map((q: Raw) => q.question).join(' '), max)
+  const value = input.description || input.command || input.file_path || input.notebook_path || input.url || input.query
+  return value ? clip(`${tool}: ${String(value).replace(/\s+/g, ' ').trim()}`, max) : ''
 }
 
 const format = (template: string, vars: Record<string, string>) => template.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? vars[k] : m))
@@ -94,7 +119,7 @@ export function buildNote(hook: Hook, cfg: Config, t: Translate): Note {
     project,
     cwd,
     time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-    message: plainText(hook.message, max) || (category === 'permission' ? t('ev.permission.fallback') : ''),
+    message: asked(hook, max) || plainText(localize(hook.message?.trim() ?? '', t), max) || (category === 'permission' ? t('ev.permission.fallback') : ''),
     summary: summary || t('ev.stop.fallback'),
   }
   return {
