@@ -26,7 +26,7 @@ Tasarım ve ayarlar tüm ajanlar için ortaktır; hepsi aynı görünür ve ayn�
 |---|---|
 | Windows | `NextNotify-Setup.exe` |
 | macOS (Intel ve Apple silicon) | `NextNotify-Setup.dmg` |
-| Linux | `Next-Notify-x.y.z-x86_64.AppImage` ya da `.deb` |
+| Linux | `Next-Notify-x86_64.AppImage` ya da `.deb` |
 
 Uygulama sistem tepsisinde / menü çubuğunda çalışır ve varsayılan olarak oturum açılınca başlar. Her açılışta yeni sürüm olup olmadığına bakar, varsa arka planda indirir ve ayar penceresi kapalıyken sessizce kurar.
 

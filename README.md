@@ -26,7 +26,7 @@ Design and settings are shared by every agent, so all of them look and sound the
 |---|---|
 | Windows | `NextNotify-Setup.exe` |
 | macOS (Intel and Apple silicon) | `NextNotify-Setup.dmg` |
-| Linux | `Next-Notify-x.y.z-x86_64.AppImage` or `.deb` |
+| Linux | `Next-Notify-x86_64.AppImage` or `.deb` |
 
 The app runs in the tray / menu bar and starts at login by default. It checks for a new version every time it starts, downloads it in the background and installs it silently once the settings window is closed.
 

@@ -101,7 +101,7 @@
       "category": "Development",
       "maintainer": "Next to Future",
       "icon": "build/icon.png",
-      "artifactName": "Next-Notify-${version}-${arch}.${ext}"
+      "artifactName": "Next-Notify-${arch}.${ext}"
     }
   },
   "dependencies": {

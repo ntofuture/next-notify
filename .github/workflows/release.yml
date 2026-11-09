@@ -23,8 +23,8 @@ jobs:
           |---|---|---|---|
           | Windows 10 / 11 | x64 | [NextNotify-Setup.exe]($URL/NextNotify-Setup.exe) | Run the installer |
           | macOS 12+ | Apple silicon and Intel (universal) | [NextNotify-Setup.dmg]($URL/NextNotify-Setup.dmg) | Open it and drag the app into Applications |
-          | Linux (any distribution) | x64 | [Next-Notify-$VERSION-x86_64.AppImage]($URL/Next-Notify-$VERSION-x86_64.AppImage) | \`chmod +x\` the file, then run it |
-          | Debian / Ubuntu | x64 | [Next-Notify-$VERSION-amd64.deb]($URL/Next-Notify-$VERSION-amd64.deb) | \`sudo apt install ./Next-Notify-$VERSION-amd64.deb\` |
+          | Linux (any distribution) | x64 | [Next-Notify-x86_64.AppImage]($URL/Next-Notify-x86_64.AppImage) | \`chmod +x\` the file, then run it |
+          | Debian / Ubuntu | x64 | [Next-Notify-amd64.deb]($URL/Next-Notify-amd64.deb) | \`sudo apt install ./Next-Notify-amd64.deb\` |
 
           The \`.zip\`, \`.blockmap\` and \`latest*.yml\` files are used by the in-app updater; you don't need to download them.
           EOF
