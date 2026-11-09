@@ -25,8 +25,8 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     'msg.permission': '{tool} kullanmak için onayın gerekiyor.',
     'msg.idle': 'Yanıtını bekliyor.',
     'sample.stop': 'Bildirim uygulamasını kurdum, hook’ları bağladım ve testleri çalıştırdım. Her şey hazır.',
-    'sample.permission': 'Claude needs your permission to use Bash',
-    'sample.idle': 'Claude is waiting for your input',
+    'sample.permission': 'Bash kullanmak için onayın gerekiyor.',
+    'sample.idle': 'Yanıtını bekliyor.',
 
     crumb: 'kodlama ajanı bildirimleri',
     reset: 'Varsayılana dön',
@@ -151,6 +151,7 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     copy: 'Kopyala',
 
     'events.log': 'son olaylar',
+    'notes.title': 'sürüm notları',
     'events.clear': 'Temizle',
     'events.empty': 'Bir araç görevi bitirdiğinde ya da izin istediğinde burada görünür.',
     'log.shown': 'gösterildi',
@@ -307,6 +308,7 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     copy: 'Copy',
 
     'events.log': 'recent events',
+    'notes.title': 'release notes',
     'events.clear': 'Clear',
     'events.empty': 'Events show up here when an agent finishes a task or asks for permission.',
     'log.shown': 'shown',

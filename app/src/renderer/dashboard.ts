@@ -1,5 +1,6 @@
 import type { Agent, Category, Config, Lang, State, Theme, WindowAction } from '../types.js'
 import { createCard } from './shared/card.js'
+import { RELEASES } from './releases.js'
 import { translator, type Translate } from './shared/i18n.js'
 import { ACCENTS, AGENTS, FONTS, ICONS, THEMES, iconSvg } from './shared/look.js'
 import { PRESET_NAMES, playSound } from './shared/sounds.js'
@@ -113,6 +114,7 @@ function applyLang(next: Lang) {
   sync()
   renderSetup()
   renderLog()
+  renderNotes()
 }
 
 function build() {
@@ -226,6 +228,17 @@ function renderLog() {
       return `<li class="${esc(e.status)}"><span class="ev-dot" style="--c:${color}"></span><div><b>${esc(e.title || '—')}</b><small>${clock(e.at, true)} · ${esc(AGENTS[e.agent])} · ${esc(e.project)} · ${esc(t(`log.${e.status}`))}${detail}</small></div></li>`
     })
     .join('')
+}
+
+function renderNotes() {
+  $('#notes').innerHTML = RELEASES.map(
+    (r) => `<section><b>v${esc(r.version)}<small>${esc(r.date)}</small></b><ul>${r.notes[lang].map((n) => `<li>${esc(n)}</li>`).join('')}</ul></section>`,
+  ).join('')
+}
+
+function showNotes(open: boolean) {
+  $('#notesPop').hidden = !open
+  $('#btnNotes').setAttribute('aria-expanded', String(open))
 }
 
 function showTab() {
@@ -370,10 +383,13 @@ function bind() {
   $('#btnSetup').addEventListener('click', () => showSetup(true))
   $('#btnSetupClose').addEventListener('click', () => showSetup(false))
   $('#btnBell').addEventListener('click', () => showEvents(Boolean($('#eventsPop').hidden)))
+  $('#btnNotes').addEventListener('click', () => showNotes(Boolean($('#notesPop').hidden)))
   addEventListener('pointerdown', (e) => !$('#eventsPop').hidden && !closest(e, '.bell-wrap') && showEvents(false))
+  addEventListener('pointerdown', (e) => !$('#notesPop').hidden && !closest(e, '.notes-wrap') && showNotes(false))
   addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return
     if (!$('#eventsPop').hidden) showEvents(false)
+    else if (!$('#notesPop').hidden) showNotes(false)
     else if (!$('#setupSheet').hidden) showSetup(false)
   })
   $('#themeSwitch').addEventListener('click', switchTheme)
